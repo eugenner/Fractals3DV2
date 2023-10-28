@@ -75,16 +75,16 @@ AFRAME.registerComponent("handy-component", {
     });
 
 
-/*
-    this.el.sceneEl.addEventListener("enter-vr", () => {
-      for (const name of ["select", "selectstart", "selectend", "squeeze", "squeezeend", "squeezestart"])
-        // sceneEl.xrSession.addEventListener(name, this.eventFactory(name, this));
-        this.el.sceneEl.xrSession.addEventListener(name,
-          (event) => {
-            console.log('event: ' + event.type)
-          });
-    });
-*/
+    /*
+        this.el.sceneEl.addEventListener("enter-vr", () => {
+          for (const name of ["select", "selectstart", "selectend", "squeeze", "squeezeend", "squeezestart"])
+            // sceneEl.xrSession.addEventListener(name, this.eventFactory(name, this));
+            this.el.sceneEl.xrSession.addEventListener(name,
+              (event) => {
+                console.log('event: ' + event.type)
+              });
+        });
+    */
 
     this.el.sceneEl.addEventListener('loaded', () => {
 
@@ -103,7 +103,7 @@ AFRAME.registerComponent("handy-component", {
       camera.position.add(new THREE.Vector3(0, 0, -1));
       // camera.el.setAttribute('look-controls', {pointerLockEnabled: false});
 
-  
+
 
       let controllerGrip1, controllerGrip2;
 
@@ -225,23 +225,24 @@ AFRAME.registerComponent("handy-component", {
       const drawTree = (data) => {
         var aframeScene = document.querySelector("a-scene");
         var threeScene = aframeScene.object3D;
+
+        let maxLevel = 7; // TODO setup this from UI
+        let levelColors = [];
+        for (let l = 0; l <= maxLevel; l++) {
+          levelColors.push(new THREE.Color(0x0000FF));
+        }
+        levelColors.push(new THREE.Color(0xFFFFFF));
+
         data.forEach((levelData) => {
-          levelData.forEach((line) => {
-            var lg = new THREE.BufferGeometry().setFromPoints(line);
-            const lm = new THREE.LineBasicMaterial({ color: 'blue' });
-            var line = new THREE.Line(lg, lm);
-            lines.push(line);
-            threeScene.add(line);
-          });
-
-          // var lg = new THREE.BufferGeometry().setFromPoints(levelData);
-          // const lm = new THREE.LineBasicMaterial({ color: 'blue' });
-          // var line = new THREE.Line(lg, lm);
-          // threeScene.add(line);
-
+          var lg = new THREE.BufferGeometry().setFromPoints(levelData);
+          const lm = new THREE.LineBasicMaterial({ color: 'blue' });
+          var line = new THREE.Line(lg, lm);
+          lines.push(line);
+          threeScene.add(line);
         })
       };
 
+      // TODO should be THREE.LineSegments used?
       const drawTree2 = () => {
         var aframeScene = document.querySelector("a-scene");
         var threeScene = aframeScene.object3D;
@@ -249,7 +250,7 @@ AFRAME.registerComponent("handy-component", {
         const lm = new THREE.LineBasicMaterial({ vertexColors: true });
         const colors = new Float32Array(fractalTreePairsPointsColor.flatMap(c => c.toArray()));
         lg.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-      
+
         var segment = new THREE.LineSegments(lg, lm);
         segment.material.depthTest = false;
         segments.push(segment);

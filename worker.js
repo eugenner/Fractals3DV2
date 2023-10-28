@@ -1,6 +1,6 @@
 importScripts('node_modules/super-three/build/three.js'); 
 
-let lines = [[],[],[],[],[],[]];
+let lines = [[],[],[],[],[],[]]; // TODO set by number of fractal tree levels
 
 
 self.onmessage = function(event) {
@@ -20,6 +20,7 @@ self.onmessage = function(event) {
 
   };
 
+  // Converting primitive types to THREE objects
   const convertToT3Obj = (data) => {
     let result = [];
     if(Array.isArray(data[0])) {
@@ -39,23 +40,12 @@ self.onmessage = function(event) {
     }
     return result;
   }
-
-  const drawLine = (points, color) => {
-
-    points = [points[0], points[1]];
-    var lg = new THREE.BufferGeometry().setFromPoints(points);
-    const lm = new THREE.LineBasicMaterial({ color: color });
-    var line = new THREE.Line(lg, lm);
-
-    return line;
-  }
   
   const drawFractal = (base, branches, level) => {
 
     // lines[level - 1].push([base[0], base[1]]);
-
     branches.forEach((b) => {
-      lines[level - 1].push([b[0], b[1]]);
+      lines[level - 1].push(b[0], b[1]);
     });
 
     if (level > 4)
