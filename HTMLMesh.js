@@ -1,21 +1,42 @@
-import {
+// import line is changed to use the same THREE version 
+// https://github.com/supermedium/superframe/blob/master/components/orbit-controls/lib/OrbitControls.js#L1-L5
+
+const {
 	CanvasTexture,
 	LinearFilter,
 	Mesh,
 	MeshBasicMaterial,
 	PlaneGeometry,
 	sRGBEncoding,
-	Color
-} from 'three';
+	Color,
+	ImageUtils
+} = THREE;
 
-class HTMLMesh extends THREE.Mesh {
+class HTMLMesh extends Mesh {
 
-	constructor( dom ) {
+	constructor( dom, alfatexture ) {
 
+
+		const canvas = document.createElement('canvas'),
+		ctx = canvas.getContext('2d');
+		canvas.width = 64;
+		canvas.height = 64;
+		// drawing gray scale areas
+		ctx.fillStyle = '#404040';
+		ctx.fillRect(0, 0, 32, 32);
+		ctx.fillStyle = '#808080';
+		ctx.fillRect(32, 0, 32, 32);
+		ctx.fillStyle = '#c0c0c0';
+		ctx.fillRect(0, 32, 32, 32);
+		ctx.fillStyle = '#f0f0f0';
+		ctx.fillRect(32, 32, 32, 32);
+		// const alfatexture = new THREE.CanvasTexture(canvas);
+
+///////////
 		const texture = new HTMLTexture( dom );
 
 		const geometry = new PlaneGeometry( texture.image.width * 0.001, texture.image.height * 0.001 );
-		const material = new MeshBasicMaterial( { map: texture, toneMapped: false, transparent: true } );
+		const material = new MeshBasicMaterial( {alphaMap: alfatexture, map: texture, toneMapped: false, transparent: true } );
 
 		super( geometry, material );
 

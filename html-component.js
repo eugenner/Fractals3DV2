@@ -20,6 +20,7 @@ documentation:
 	schemaHTML.cursor.description = `Visual indicator for where the user is currently pointing`;
 }
 
+
 const _pointer = new THREE.Vector2();
 const _event = { type: '', data: _pointer };
 AFRAME.registerComponent('html', {
@@ -38,6 +39,7 @@ AFRAME.registerComponent('html', {
 				intersection: null
 			}
 		};
+		this.alfatexture = null;
 	},
 	play() {
 		this.el.addEventListener('click', this.onClick);
@@ -56,11 +58,27 @@ AFRAME.registerComponent('html', {
 	update() {
 		this.remove();
 		if (!this.data.html) return;
-		const mesh = new HTMLMesh(this.data.html);
-		this.el.setObject3D('html', mesh);
-		this.data.html.addEventListener('input', this.rerender);
-		this.data.html.addEventListener('change', this.rerender);
-		this.cursor = this.data.cursor ? this.data.cursor.object3D : null;
+
+		// TODO improve texture loading, if not loaded - load generated texture
+		try {
+			new THREE.TextureLoader().load("half_tr__texture.png", 
+			(alfatexture) => {
+				console.log('texture loaded');
+				this.alfatexture = alfatexture;
+
+				// TODO
+				const mesh = new HTMLMesh(this.data.html, alfatexture);
+				this.el.setObject3D('html', mesh);
+
+			});
+				this.data.html.addEventListener('input', this.rerender);
+				this.data.html.addEventListener('change', this.rerender);
+				this.cursor = this.data.cursor ? this.data.cursor.object3D : null;
+
+		} catch (err) {
+			console.log('texture load err: ' + err);
+		}
+
 	},
 	tick() {
 		if (this.activeRaycaster) {

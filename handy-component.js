@@ -242,6 +242,20 @@ AFRAME.registerComponent("handy-component", {
         })
       };
 
+      const drawTree2 = () => {
+        var aframeScene = document.querySelector("a-scene");
+        var threeScene = aframeScene.object3D;
+        var lg = new THREE.BufferGeometry().setFromPoints(fractalTreePairsPoints);
+        const lm = new THREE.LineBasicMaterial({ vertexColors: true });
+        const colors = new Float32Array(fractalTreePairsPointsColor.flatMap(c => c.toArray()));
+        lg.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      
+        var segment = new THREE.LineSegments(lg, lm);
+        segment.material.depthTest = false;
+        segments.push(segment);
+        threeScene.add(segment);
+      }
+
       const generateTree = () => {
         var aframeScene = document.querySelector("a-scene");
         var threeScene = aframeScene.object3D;
