@@ -7,6 +7,7 @@ const fractalRootOrigin = new THREE.Vector3(0, 1, 0);
 let fractalTree = [];
 let branchTriangles = new Map(); // array of lines: [ind, [orig-forward, orig-perp, forward-perp]]
 let lines = []; // lines of the tree
+let segments = []; // lines of the tree
 const base = [
   new THREE.Vector3(0, 0, 0), // [0] - center of triangle
   new THREE.Vector3(0, 1, 0), // forward vector
@@ -223,43 +224,43 @@ AFRAME.registerComponent("handy-component", {
       };
 
       const drawTree = (data) => {
-        var aframeScene = document.querySelector("a-scene");
-        var threeScene = aframeScene.object3D;
+        let aframeScene = document.querySelector("a-scene");
+        let threeScene = aframeScene.object3D;
 
-        let maxLevel = 7; // TODO setup this from UI
+        let maxLevel = 3; // TODO setup this from UI
         let levelColors = [];
         for (let l = 0; l <= maxLevel; l++) {
           levelColors.push(new THREE.Color(0x0000FF));
         }
         levelColors.push(new THREE.Color(0xFFFFFF));
 
-        data.forEach((levelData) => {
-          var lg = new THREE.BufferGeometry().setFromPoints(levelData);
-          const lm = new THREE.LineBasicMaterial({ color: 'blue' });
-          var line = new THREE.Line(lg, lm);
-          lines.push(line);
-          threeScene.add(line);
+        data.forEach((levelData, lvl) => {
+          let lg = new THREE.BufferGeometry().setFromPoints(levelData);
+          const lm = new THREE.LineBasicMaterial({ color: levelColors[lvl] });
+          let segment = new THREE.LineSegments(lg, lm);
+          segments.push(segment);
+          threeScene.add(segment);
         })
       };
 
       // TODO should be THREE.LineSegments used?
       const drawTree2 = () => {
-        var aframeScene = document.querySelector("a-scene");
-        var threeScene = aframeScene.object3D;
-        var lg = new THREE.BufferGeometry().setFromPoints(fractalTreePairsPoints);
+        let aframeScene = document.querySelector("a-scene");
+        let threeScene = aframeScene.object3D;
+        let lg = new THREE.BufferGeometry().setFromPoints(fractalTreePairsPoints);
         const lm = new THREE.LineBasicMaterial({ vertexColors: true });
         const colors = new Float32Array(fractalTreePairsPointsColor.flatMap(c => c.toArray()));
         lg.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-        var segment = new THREE.LineSegments(lg, lm);
+        let segment = new THREE.LineSegments(lg, lm);
         segment.material.depthTest = false;
         segments.push(segment);
         threeScene.add(segment);
       }
 
       const generateTree = () => {
-        var aframeScene = document.querySelector("a-scene");
-        var threeScene = aframeScene.object3D;
+        let aframeScene = document.querySelector("a-scene");
+        let threeScene = aframeScene.object3D;
         lines.forEach((l) => {
           threeScene.remove(l);
         });
@@ -307,13 +308,11 @@ AFRAME.registerComponent("handy-component", {
         }, 300);
       };
 
-
-
       const clearTree = () => {
-        var aframeScene = document.querySelector("a-scene");
-        var threeScene = aframeScene.object3D;
-        lines.forEach((l) => {
-          threeScene.remove(l);
+        let aframeScene = document.querySelector("a-scene");
+        let threeScene = aframeScene.object3D;
+        segments.forEach((s) => {
+          threeScene.remove(s);
         });
       };
 
@@ -327,10 +326,6 @@ AFRAME.registerComponent("handy-component", {
           el.style.backgroundColor = defaultBgColor;
         }, 300);
       };
-
-
-
-
 
       const switchLightButtons = document.querySelectorAll('input[type="radio"][name="switchLight"]');
       switchLightButtons.forEach((btn) => {
@@ -355,18 +350,27 @@ AFRAME.registerComponent("handy-component", {
 
       }
 
+      document.getElementById("exitXR").onclick = (evt) => {
+        exitXR();
+      }
+
+      const exitXR = () => {
+        let aframeScene = document.querySelector("a-scene");
+        aframeScene.exitVR();
+      }
+
       // fractal tree managment logic
 
 
       const drawLine = (points, color) => {
-        var aframeScene = document.querySelector("a-scene");
+        let aframeScene = document.querySelector("a-scene");
 
         // Access the THREE.js scene
-        var threeScene = aframeScene.object3D;
+        let threeScene = aframeScene.object3D;
         points = [points[0], points[1]];
-        var lg = new THREE.BufferGeometry().setFromPoints(points);
+        let lg = new THREE.BufferGeometry().setFromPoints(points);
         const lm = new THREE.LineBasicMaterial({ color: color });
-        var line = new THREE.Line(lg, lm);
+        let line = new THREE.Line(lg, lm);
         threeScene.add(line);
         return line;
       }
@@ -422,7 +426,7 @@ AFRAME.registerComponent("handy-component", {
       // Remove the last branch from the tree
       const removeBranch = () => {
         const scene = document.querySelector('a-scene');
-        var threeScene = scene.object3D;
+        let threeScene = scene.object3D;
         const indexOfLast = fractalTree.length;
         // remote lines of a branch triangle
         if (branchTriangles.has(indexOfLast)) {
@@ -818,14 +822,14 @@ AFRAME.registerComponent("handy-component", {
     return true;
   },
   drawLine(points, color) {
-    var aframeScene = document.querySelector("a-scene");
+    let aframeScene = document.querySelector("a-scene");
 
     // Access the THREE.js scene
-    var threeScene = aframeScene.object3D;
+    let threeScene = aframeScene.object3D;
     points = [points[0], points[1]];
-    var lg = new THREE.BufferGeometry().setFromPoints(points);
+    let lg = new THREE.BufferGeometry().setFromPoints(points);
     const lm = new THREE.LineBasicMaterial({ color: color });
-    var line = new THREE.Line(lg, lm);
+    let line = new THREE.Line(lg, lm);
     threeScene.add(line);
     return line;
   },

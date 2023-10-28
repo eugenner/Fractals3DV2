@@ -44,8 +44,9 @@
   </head>
 
   <body>
-    <a-scene handy-component debug shadow="type: pcfsoft"
-      webxr="optionalFeatures:hand-tracking,dom-overlay;overlayElement:#dom-overlay;">
+    <a-scene handy-component shadow="type: pcfsoft"
+      webxr="optionalFeatures:hand-tracking,dom-overlay;overlayElement:#dom-overlay;"
+      render-order="background, menu, menubutton, menutext, foreground, hud">
       <a-assets>
         <a-sphere id="branch_" ind color="green" radius="0.025" class="branch clickable movable"><a-sphere id="branch_perp_" ind color="red" radius="0.0125" class="branch_perp clickable movable" position="0.25 -0.5 0"></a-sphere></a-sphere>
       </a-assets>
@@ -91,7 +92,7 @@
       <!-- <a-circle hide-on-enter-ar shadow="cast:false" class="navmesh" rotation="-90 0 0" radius="6"
         material="shader:phong;color:white;"></a-circle> -->
       <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0"
-        environment="lighting:none;preset:yavapai;skyType:atmosphere;ground:flat;fog:0;flatShading:true">
+        environment="lighting:none;preset:yavapai;skyType:atmosphere;">
       </a-entity>
       
     </a-scene>
@@ -139,7 +140,7 @@
         <div>Status: <span id="statusText" style="font-size: smaller;">Ready</span></div>
         <hr>
         <div style="display: flex; justify-content: center; margin-top: 1em;">
-          <button id="exitVR"
+          <button id="exitXR"
             style="display: block; border-radius: 1em;">Exit Immersive</button>
         </div>
       </section>
