@@ -16,7 +16,7 @@ class HTMLMesh extends Mesh {
 
 	constructor( dom, alfatexture ) {
 
-
+		/* dynamic generated texture
 		const canvas = document.createElement('canvas'),
 		ctx = canvas.getContext('2d');
 		canvas.width = 64;
@@ -30,9 +30,9 @@ class HTMLMesh extends Mesh {
 		ctx.fillRect(0, 32, 32, 32);
 		ctx.fillStyle = '#f0f0f0';
 		ctx.fillRect(32, 32, 32, 32);
-		// const alfatexture = new THREE.CanvasTexture(canvas);
+		const alfatexture = new THREE.CanvasTexture(canvas);
+		*/
 
-///////////
 		const texture = new HTMLTexture( dom );
 
 		const geometry = new PlaneGeometry( texture.image.width * 0.001, texture.image.height * 0.001 );

@@ -6,6 +6,7 @@ import { RandomTreeData } from './random-tree.js';
 const fractalRootOrigin = new THREE.Vector3(0, 1, 0);
 let fractalTree = [];
 let branchTriangles = new Map(); // array of lines: [ind, [orig-forward, orig-perp, forward-perp]]
+let branchMeshTriangles = new Map(); // array of triangles
 let lines = []; // lines of the tree
 let segments = []; // lines of the tree
 const base = [
@@ -34,6 +35,7 @@ AFRAME.registerComponent("handy-component", {
     this.tmpVector2 = new THREE.Vector3();
     this.tempV3 = new THREE.Vector3();
     this.tempV32 = new THREE.Vector3();
+    this.tempV33 = new THREE.Vector3();
 
     this.movables = [];
     this.hands = [];
@@ -52,6 +54,8 @@ AFRAME.registerComponent("handy-component", {
     this.squeezedEl = null;
     this.squeezedByRight = false; // by Hand or Controller
     this.squeezedByLeft = false;
+
+    this.triangleMeshTexture = this.getTexture();
 
     this.onPinchStart = this.onPinchStart.bind(this);
     this.onPinchEnd = this.onPinchEnd.bind(this);
@@ -359,8 +363,7 @@ AFRAME.registerComponent("handy-component", {
         aframeScene.exitVR();
       }
 
-      // fractal tree managment logic
-
+      // --- fractal tree managment logic ---
 
       const drawLine = (points, color) => {
         let aframeScene = document.querySelector("a-scene");
@@ -421,6 +424,24 @@ AFRAME.registerComponent("handy-component", {
         lines.push(drawLine([fractalRootOrigin, tempV3], 'green'));
         lines.push(drawLine([newBranch.object3D.position, tempV3], 'yellow'));
         branchTriangles.set(parseInt(newBranch.getAttribute('ind')), lines);
+
+
+        // TODO add mesh triangle entity
+
+        let points =
+          [fractalRootOrigin,
+            newBranch.object3D.position,
+            tempV3];
+        let geometry = new THREE.BufferGeometry().setFromPoints(points);
+        geometry.computeVertexNormals();
+
+        const material = new THREE.MeshBasicMaterial({
+          alphaMap: this.triangleMeshTexture,
+          transparent: true, side: THREE.DoubleSide
+        });
+        const meshTriangle = new THREE.Mesh(geometry, material)
+        branchMeshTriangles.set(parseInt(newBranch.getAttribute('ind')), meshTriangle);
+        this.tScene.add(meshTriangle);
       }
 
       // Remove the last branch from the tree
@@ -436,6 +457,10 @@ AFRAME.registerComponent("handy-component", {
           });
           branchTriangles.delete(indexOfLast);
         }
+        if (branchMeshTriangles.has(indexOfLast)) {
+          threeScene.remove(branchMeshTriangles.get(indexOfLast));
+          branchMeshTriangles.delete(indexOfLast);
+        }
         const entityToRemove = fractalTree.pop();
         if (entityToRemove)
           entityToRemove.remove();
@@ -448,7 +473,7 @@ AFRAME.registerComponent("handy-component", {
         }
       }
 
-      // update triangle position for current moving branch points
+      // update triangle position for currently moved branch points
       this.redrawTriangle = () => {
         let selectedL = null;
         let selectedR = null;
@@ -473,7 +498,8 @@ AFRAME.registerComponent("handy-component", {
 
       const redrawTriangleByInd = (ind) => {
         let triangle = branchTriangles.get(ind);
-        if (!triangle)
+        let meshTriangle = branchMeshTriangles.get(ind);
+        if (!(triangle && meshTriangle))
           return;
         let forwardEntity = document.getElementById('branch_' + ind);
         let perpEntity = document.getElementById('branch_perp_' + ind);
@@ -487,19 +513,38 @@ AFRAME.registerComponent("handy-component", {
         let hipoLine = triangle[2];
         hipoLine.geometry.attributes.position.setXYZ(0,
           this.tempV32.x, this.tempV32.y, this.tempV32.z);
-
-        perpEntity.object3D.getWorldPosition(this.tempV32);
-        let perpLine = triangle[1];
-        perpLine.geometry.attributes.position.setXYZ(1,
-          this.tempV32.x, this.tempV32.y, this.tempV32.z);
-        perpLine.geometry.attributes.position.needsUpdate = true;
-
         hipoLine.geometry.attributes.position.setXYZ(1,
           this.tempV32.x, this.tempV32.y, this.tempV32.z);
         hipoLine.geometry.attributes.position.needsUpdate = true;
+
+        perpEntity.object3D.getWorldPosition(this.tempV33);
+        let perpLine = triangle[1];
+        perpLine.geometry.attributes.position.setXYZ(1,
+          this.tempV33.x, this.tempV33.y, this.tempV33.z);
+        perpLine.geometry.attributes.position.needsUpdate = true;
+
+        // half transparent triangle vertexes position change
+        meshTriangle.geometry.attributes.position.setXYZ(1,
+          this.tempV32.x, this.tempV32.y, this.tempV32.z);
+        meshTriangle.geometry.attributes.position.setXYZ(2,
+          this.tempV33.x, this.tempV33.y, this.tempV33.z);
+        meshTriangle.geometry.attributes.position.needsUpdate = true;
+
+        // branchTrTriangles.get(1).geometry.attributes.position
+        // branchTrTriangles.get(1).geometry.attributes.position.array
+
       }
 
     });
+  },
+  getTexture() {
+    const canvas = document.createElement('canvas'),
+      ctx = canvas.getContext('2d');
+    canvas.width = 64;
+    canvas.height = 64;
+    ctx.fillStyle = '#404040';
+    ctx.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(canvas);
   },
   onPinchStart(event) {
     const controller = event.target;
@@ -769,10 +814,10 @@ AFRAME.registerComponent("handy-component", {
 
 
 
-        if (dtR < 0.05) {
+        if (dtR < 0.02) {
           this.repositionUiPanel(this.handR.joints['middle-finger-tip'].position.clone());
         }
-        if (dtL < 0.05) {
+        if (dtL < 0.02) {
           this.repositionUiPanel(this.handL.joints['middle-finger-tip'].position.clone());
         }
       }
@@ -799,7 +844,7 @@ AFRAME.registerComponent("handy-component", {
     newPosition.add(camPos).add(additionalDistance);
     uiPanel.object3D.position.copy(newPosition);
     uiPanel.object3D.lookAt(camPos);
-    this.drawLine([camPos, uiPanel.object3D.position], 'red');
+    // this.drawLine([camPos, uiPanel.object3D.position], 'red');
   },
   clickByTip(indexTip) {
     // calculating x,y coordinates of the point of ui-panel touching in percentage
