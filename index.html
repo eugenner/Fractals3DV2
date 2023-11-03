@@ -39,6 +39,23 @@
               color: white;
             }
 
+            .container {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+
+            .exit-xr {
+              flex: 1;
+              text-align: center;
+            }
+
+            .help {
+              flex: 0;
+              border-radius: 1em;
+              /* Add any styles for the "help" div as needed */
+            }
+
 </style>
 
   </head>
@@ -49,8 +66,11 @@
       render-order="background, menu, menubutton, menutext, foreground, hud">
       <a-assets>
         <a-sphere id="branch_" ind color="green" radius="0.025" class="branch clickable movable"><a-sphere id="branch_perp_" ind color="red" radius="0.0125" class="branch_perp clickable movable" position="0.25 -0.5 0"></a-sphere></a-sphere>
+        <a-asset-item id="help_model" src="./help.glb"></a-asset-item>
       </a-assets>
 
+      <a-gltf-model id="help_obj" src="#help_model" position="0 0 0" rotation="0 0 0" scale="1 1 1"></a-gltf-model>
+  
       <a-sphere color="red" radius="0.01" id="cursor" material="shader:flat"></a-sphere>
 
       <!-- handy-cursor="rayOrigin: xrselect" -->
@@ -74,11 +94,8 @@
         position="0 0.8 -1.5">
       </a-sphere>
       <a-sphere id="ball2" class="movable" color="blue" radius="0.25"
-        position="-0.5 0.8 -0.5" visible="true" 
-        material="color: blue; opacity: 0.5;"
-        >
-
-
+        position="-0.5 0.8 -0.5" visible="true"
+        material="color: blue; opacity: 0.5;">
 
       </a-sphere>
       <a-entity id="ui-panel" class="movable"
@@ -86,15 +103,16 @@
         position="0.7 1 -1" material="opacity: 0.5;">
       </a-entity>
 
-
-      <a-light id="dirlight" intensity="1" light="castShadow:false;type:directional" position="40 80 0"></a-light>
-      <a-light type="hemisphere" ground-color="orange" color="white" intensity="0"></a-light>
+      <a-light id="dirlight" intensity="1"
+        light="castShadow:false;type:directional" position="40 80 10"></a-light>
+      <a-light type="hemisphere" ground-color="orange" color="white"
+        intensity="0"></a-light>
       <!-- <a-circle hide-on-enter-ar shadow="cast:false" class="navmesh" rotation="-90 0 0" radius="6"
         material="shader:phong;color:white;"></a-circle> -->
       <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0"
         environment="lighting:none;preset:yavapai;skyType:atmosphere;">
       </a-entity>
-      
+
     </a-scene>
 
     <div id="dom-overlay" class="a-dom-overlay">
@@ -137,13 +155,19 @@
           <label>Night</label>
         </fieldset>
         <hr>
-        <div>Status: <span id="statusText" style="font-size: smaller;">Ready</span></div>
-        <hr>
-        <div style="display: flex; justify-content: center; margin-top: 1em;">
-          <button id="exitXR"
-            style="display: block; border-radius: 1em;">Exit Immersive</button>
+        <div style="display: flex; align-items: center;">
+          <div style="flex: 0; text-align: left;">Status:</div>
+          <div id="statusText" style="flex: 1; text-align: center; margin-right: 3em; font-size: smaller;">Ready</div>
         </div>
+        <hr>
+
+        <div class="container">
+          <div id="exitXR" class="exit-xr"><button style="border-radius: 1em;">Exit Immersive</button></div>
+          <button id="help" class="help">?</button>
+        </div>
+
       </section>
+      
     </div>
   </body>
 </html>

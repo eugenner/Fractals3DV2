@@ -91,10 +91,44 @@ AFRAME.registerComponent("handy-component", {
         });
     */
 
-    this.el.sceneEl.addEventListener('loaded', () => {
+    document.getElementById("help_obj").addEventListener('model-loaded', (evt) => {
+      const aabb = new THREE.Box3().setFromObject(evt.target.object3D);
+      const helpObjBox = document.createElement('a-entity');
+      helpObjBox.setAttribute('id', 'help_obj_box');
+      helpObjBox.setAttribute('geometry', {
+        primitive: 'box',
+        depth: aabb.max.z - aabb.min.z,
+        height: aabb.max.y - aabb.min.y,
+        width: aabb.max.x - aabb.min.x
+      });
+      helpObjBox.setAttribute('material', {
+        color: 'blue',
+        opacity: 0.1
+      });
+      helpObjBox.classList.add('movable');
+
+      const midpoint = new THREE.Vector3();
+      midpoint.copy(aabb.min).add(aabb.max).multiplyScalar(0.5);
+      helpObjBox.object3D.position.copy(midpoint);
+      
+      this.el.appendChild(helpObjBox);
+      
+      helpObjBox.object3D.attach(evt.target.object3D);
+      helpObjBox.object3D.rotation.x = - Math.PI / 2; // TODO improve initial position (rotation!) of .glb
+      helpObjBox.object3D.position.set(0,1.5,0);
+    
+      // TODO improve this: 
+      // this.movables potentionally could be initialized later 
+      this.movables.push(helpObjBox.object3D);
 
 
+    });
+
+    this.el.sceneEl.addEventListener('loaded', (sceneEvt) => {
+      
+      this.tScene = this.el.sceneEl.object3D;
       this.uiPanel = document.getElementById('ui-panel');
+
 
       this.movables = Array.from(document.getElementsByClassName('movable'))
         .map((e, i) => {
@@ -102,7 +136,7 @@ AFRAME.registerComponent("handy-component", {
         });
 
 
-      this.tScene = this.el.sceneEl.object3D;
+      
 
       const camera = this.el.camera;
       camera.position.add(new THREE.Vector3(0, 0, -1));
@@ -363,6 +397,18 @@ AFRAME.registerComponent("handy-component", {
         aframeScene.exitVR();
       }
 
+      const showHelp = (evt) => {
+        const helpObj = document.getElementById("help_obj").object3D;
+        const aabb = new THREE.Box3().setFromObject(helpObj);
+        console.log(aabb)
+        
+        this.drawLine([aabb.min, aabb.max], 'red');
+      }
+
+      document.getElementById("help").onclick = (evt) => {
+        showHelp(evt);
+      }
+
       // --- fractal tree managment logic ---
 
       const drawLine = (points, color) => {
@@ -422,22 +468,25 @@ AFRAME.registerComponent("handy-component", {
         perpEntity.object3D.getWorldPosition(tempV3);
         lines.push(drawLine([fractalRootOrigin, newBranch.object3D.position], 'blue'));
         lines.push(drawLine([fractalRootOrigin, tempV3], 'green'));
-        lines.push(drawLine([newBranch.object3D.position, tempV3], 'yellow'));
+        let yellowLine = drawLine([newBranch.object3D.position, tempV3], 'yellow');
+        yellowLine.visible = false;
+        lines.push(yellowLine);
         branchTriangles.set(parseInt(newBranch.getAttribute('ind')), lines);
 
 
         // TODO add mesh triangle entity
 
-        let points =
-          [fractalRootOrigin,
-            newBranch.object3D.position,
-            tempV3];
+        let points = [fractalRootOrigin, newBranch.object3D.position, tempV3];
         let geometry = new THREE.BufferGeometry().setFromPoints(points);
-        geometry.computeVertexNormals();
+        geometry.computeVertexNormals(); // TODO check if this is required
 
         const material = new THREE.MeshBasicMaterial({
-          alphaMap: this.triangleMeshTexture,
-          transparent: true, side: THREE.DoubleSide
+          // TODO choose way for transparency
+          // alphaMap: this.triangleMeshTexture,
+          opacity: 0.1,
+          transparent: true, 
+          side: THREE.DoubleSide
+          
         });
         const meshTriangle = new THREE.Mesh(geometry, material)
         branchMeshTriangles.set(parseInt(newBranch.getAttribute('ind')), meshTriangle);
@@ -579,6 +628,23 @@ AFRAME.registerComponent("handy-component", {
         }
       }
 
+      // Help (3d model) surrounding box
+      if(movable.el.id == 'help_obj_box') {
+        let helpBoxMeshes = movable.children.filter(ch => ch.el.id === 'help_obj_box');
+        if(!helpBoxMeshes)
+          continue;
+        let helpBoxMesh = helpBoxMeshes[0]; 
+        helpBoxMesh.geometry.computeBoundingBox();
+
+        // console.log('bb: ' + helpBoxMesh.geometry.boundingBox);
+        // this.drawLine([helpBoxMesh.geometry.boundingBox.min, helpBoxMesh.geometry.boundingBox.max], 'yellow');
+        if(this.checkBoundedBoxCollision(helpBoxMesh, indexTip)) {
+          return movable;
+        } else {
+          continue;
+        }
+      }
+
       const distance = indexTip.getWorldPosition(this.tmpVector1)
         .distanceTo(movable.getWorldPosition(this.tmpVector2));
       if (distance < movable.el.getAttribute('radius') * movable.scale.x) {
@@ -587,6 +653,86 @@ AFRAME.registerComponent("handy-component", {
     }
     return null;
   },
+  checkBoundedBoxCollision(boxMesh, indexTip) {
+    // 1. calc positions of all vertexes 
+    let boxCenter = boxMesh.el.object3D.position;
+    let d = boxMesh.geometry.parameters.depth;
+    let h = boxMesh.geometry.parameters.height;
+    let w = boxMesh.geometry.parameters.width;
+
+    // fill box vertexes
+    const points = Array(8).fill(null).map(() => { 
+      return new THREE.Vector3(0, 0, 0).clone() 
+    });
+    points[0].add(new THREE.Vector3(0,   h / 2, 0)).add(new THREE.Vector3(  w / 2, 0, 0));
+    points[1].add(new THREE.Vector3(0, - h / 2, 0)).add(new THREE.Vector3(  w / 2, 0, 0));
+    points[2].add(new THREE.Vector3(0, - h / 2, 0)).add(new THREE.Vector3(- w / 2, 0, 0));
+    points[3].add(new THREE.Vector3(0,   h / 2, 0)).add(new THREE.Vector3(- w / 2, 0, 0));
+    // fill box vertexes
+    for (let i = 0; i < 4; i++) {
+      points[i].add(new THREE.Vector3( 0, 0, d / 2));
+      points[i + 4] = points[i].clone().sub(new THREE.Vector3( 0, 0, d));
+    }
+
+    points.forEach((p) => {
+      p.applyQuaternion(boxMesh.el.object3D.quaternion);
+      p.add(boxCenter);
+    });
+
+
+    // this.drawLine([points[6], points[5]], 'green');
+    // this.drawLine([points[6], points[7]], 'blue');
+    // this.drawLine([points[6], points[2]], 'red');
+    // 2. check if sum of all distancies between vertexes and indexTip
+    //    close to the value of perimeter of the movable box geometry
+
+    // move all points to 0,0,0  let be start point 6
+    let startPoint = points[6].clone();
+    points.forEach((p) => {
+      p.sub(startPoint);
+    });
+    let checkPoint = indexTip.position.clone();
+    checkPoint.sub(startPoint);
+
+    // aligning the vector of points 6 - 5 with X axis
+    let zeroPoint = new THREE.Vector3(0,0,0);
+    let xVector = new THREE.Vector3(1,0,0);
+    let alignAngle = xVector.angleTo(points[5]);
+    let perpsAxis = zeroPoint.crossVectors(xVector, points[5]).normalize();
+    let qRotation = new THREE.Quaternion();
+    qRotation.setFromAxisAngle(perpsAxis, -alignAngle);
+    let alignMatrix = new THREE.Matrix4();
+    alignMatrix.makeRotationFromQuaternion(qRotation);
+    points.forEach((point) => {
+      point.applyMatrix4(alignMatrix);
+    });
+    checkPoint.applyMatrix4(alignMatrix);
+
+    // aligning the vector of points 6 - 7 with Y axis
+    let yVector = new THREE.Vector3(0,1,0);
+    alignAngle = yVector.angleTo(points[7]);
+
+    qRotation = new THREE.Quaternion();
+    qRotation.setFromAxisAngle(xVector, alignAngle);
+    alignMatrix = new THREE.Matrix4();
+    alignMatrix.makeRotationFromQuaternion(qRotation);
+    points.forEach((point) => {
+      point.applyMatrix4(alignMatrix);
+    });
+    checkPoint.applyMatrix4(alignMatrix);
+
+    // this.drawLine([points[6], points[5]], 'green');
+    // this.drawLine([points[6], points[7]], 'blue');
+    // this.drawLine([points[6], points[2]], 'red');
+
+    if(checkPoint.x > 0 && checkPoint.x < points[5].x
+      && checkPoint.y > 0 && checkPoint.y < points[7].y
+      && checkPoint.z > 0 && checkPoint.z < points[2].z
+      ) return true;
+
+    return false;
+  },
+  
   // Check if tip of index finger is close to the ui panel.
   calculateUiBoundBox(movable, indexTip) {
     let h = movable.children[0].geometry.parameters.height;
@@ -844,7 +990,7 @@ AFRAME.registerComponent("handy-component", {
     newPosition.add(camPos).add(additionalDistance);
     uiPanel.object3D.position.copy(newPosition);
     uiPanel.object3D.lookAt(camPos);
-    // this.drawLine([camPos, uiPanel.object3D.position], 'red');
+
   },
   clickByTip(indexTip) {
     // calculating x,y coordinates of the point of ui-panel touching in percentage
