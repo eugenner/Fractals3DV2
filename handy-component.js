@@ -113,9 +113,9 @@ AFRAME.registerComponent("handy-component", {
       
       this.el.appendChild(helpObjBox);
       
-      helpObjBox.object3D.attach(evt.target.object3D);
+      helpObjBox.object3D.add(evt.target.object3D);
       helpObjBox.object3D.rotation.x = - Math.PI / 2; // TODO improve initial position (rotation!) of .glb
-      helpObjBox.object3D.position.set(0,1.5,0);
+      helpObjBox.object3D.position.set(0,1.5,-5);
     
       // TODO improve this: 
       // this.movables potentionally could be initialized later 
@@ -130,11 +130,9 @@ AFRAME.registerComponent("handy-component", {
       this.uiPanel = document.getElementById('ui-panel');
 
 
-      this.movables = Array.from(document.getElementsByClassName('movable'))
-        .map((e, i) => {
-          return e.object3D;
-        });
-
+      Array.from(document.getElementsByClassName('movable')).forEach((el) => {
+        this.movables.push(el.object3D);
+      });
 
       
 
@@ -250,7 +248,7 @@ AFRAME.registerComponent("handy-component", {
         }, 300);
       };
 
-      // Worker for the fractals three calculation
+      // Worker for the fractals tree calculation
       const worker = new Worker('worker.js');
 
       // Get worker result 
