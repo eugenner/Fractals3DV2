@@ -48,12 +48,13 @@ AFRAME.registerComponent("handy-component", {
     this.controls;
 
     this.uiPanel = null;
-    this.tipIsInTheBox = false;
     this.isClickedByTip = false;
 
     this.squeezedEl = null;
     this.squeezedByRight = false; // by Hand or Controller
     this.squeezedByLeft = false;
+
+    this.helpBoxScaleDistance = null;
 
     this.triangleMeshTexture = this.getTexture();
 
@@ -110,13 +111,13 @@ AFRAME.registerComponent("handy-component", {
       const midpoint = new THREE.Vector3();
       midpoint.copy(aabb.min).add(aabb.max).multiplyScalar(0.5);
       helpObjBox.object3D.position.copy(midpoint);
-      
+
       this.el.appendChild(helpObjBox);
-      
+
       helpObjBox.object3D.add(evt.target.object3D);
       helpObjBox.object3D.rotation.x = - Math.PI / 2; // TODO improve initial position (rotation!) of .glb
-      helpObjBox.object3D.position.set(0,1.5,-5);
-    
+      helpObjBox.object3D.position.set(0, 1.5, -1);
+
       // TODO improve this: 
       // this.movables potentionally could be initialized later 
       this.movables.push(helpObjBox.object3D);
@@ -125,7 +126,7 @@ AFRAME.registerComponent("handy-component", {
     });
 
     this.el.sceneEl.addEventListener('loaded', (sceneEvt) => {
-      
+
       this.tScene = this.el.sceneEl.object3D;
       this.uiPanel = document.getElementById('ui-panel');
 
@@ -134,7 +135,7 @@ AFRAME.registerComponent("handy-component", {
         this.movables.push(el.object3D);
       });
 
-      
+
 
       const camera = this.el.camera;
       camera.position.add(new THREE.Vector3(0, 0, -1));
@@ -399,7 +400,7 @@ AFRAME.registerComponent("handy-component", {
         const helpObj = document.getElementById("help_obj").object3D;
         const aabb = new THREE.Box3().setFromObject(helpObj);
         console.log(aabb)
-        
+
         this.drawLine([aabb.min, aabb.max], 'red');
       }
 
@@ -482,9 +483,9 @@ AFRAME.registerComponent("handy-component", {
           // TODO choose way for transparency
           // alphaMap: this.triangleMeshTexture,
           opacity: 0.1,
-          transparent: true, 
+          transparent: true,
           side: THREE.DoubleSide
-          
+
         });
         const meshTriangle = new THREE.Mesh(geometry, material)
         branchMeshTriangles.set(parseInt(newBranch.getAttribute('ind')), meshTriangle);
@@ -600,7 +601,7 @@ AFRAME.registerComponent("handy-component", {
     const handWrist = controller.joints['wrist'];
     const object = this.collideObject(indexTip);
     if (object && !controller.userData.selected) {
-      handWrist.attach(object);
+
       controller.userData.selected = object;
       if (event.handedness == 'right') {
         this.squeezedByRight = (object.el.classList.contains('branch')
@@ -611,7 +612,46 @@ AFRAME.registerComponent("handy-component", {
           || object.el.classList.contains('branch_perp'));
       }
 
+      if (object.el.id != 'help_obj_box') {
+        handWrist.attach(object);
+      } else {
+        // two pinches at the same time for help box scaling
+        if (this.handL.userData.selected == object 
+            && this.handR.userData.selected == object) {
+          console.log('both pinched');
+          if (this.helpBoxScaleDistance == null) {
+            this.helpBoxScaleDistance = this.handL.joints['wrist'].position
+              .distanceTo(this.handR.joints['wrist'].position);
+          }
+          // document.getElementById('help_obj_box').object3D.scale.set(2,2,2);
+        } else {
+          this.helpBoxScaleDistance = null;
+        }
+        // TODO if the other hand has already selected = help_obj_box keep it
+        // don't reattach it to the current
+        if (event.handedness == 'right') {
+          if (this.handL.userData.selected) {
+            if (this.handL.userData.selected.el.id != 'help_obj_box')
+              handWrist.attach(object);
+          } else {
+            handWrist.attach(object);
+          }
+
+        }
+        if (event.handedness == 'left') {
+          if (this.handR.userData.selected) {
+            if (this.handR.userData.selected.el.id != 'help_obj_box')
+              handWrist.attach(object);
+          } else {
+            handWrist.attach(object);
+          }
+        }
+
+      }
+
     }
+
+
   },
   collideObject(indexTip) {
     for (let sphereInd in this.movables) {
@@ -627,16 +667,16 @@ AFRAME.registerComponent("handy-component", {
       }
 
       // Help (3d model) surrounding box
-      if(movable.el.id == 'help_obj_box') {
+      if (movable.el.id == 'help_obj_box') {
         let helpBoxMeshes = movable.children.filter(ch => ch.el.id === 'help_obj_box');
-        if(!helpBoxMeshes)
+        if (!helpBoxMeshes)
           continue;
-        let helpBoxMesh = helpBoxMeshes[0]; 
+        let helpBoxMesh = helpBoxMeshes[0];
         helpBoxMesh.geometry.computeBoundingBox();
 
         // console.log('bb: ' + helpBoxMesh.geometry.boundingBox);
         // this.drawLine([helpBoxMesh.geometry.boundingBox.min, helpBoxMesh.geometry.boundingBox.max], 'yellow');
-        if(this.checkBoundedBoxCollision(helpBoxMesh, indexTip)) {
+        if (this.checkBoundedBoxCollision(helpBoxMesh, indexTip)) {
           return movable;
         } else {
           continue;
@@ -653,23 +693,29 @@ AFRAME.registerComponent("handy-component", {
   },
   checkBoundedBoxCollision(boxMesh, indexTip) {
     // 1. calc positions of all vertexes 
-    let boxCenter = boxMesh.el.object3D.position;
+    // let boxCenter = boxMesh.el.object3D.position;
+    let boxCenter = boxMesh.el.object3D.getWorldPosition(new THREE.Vector3());
     let d = boxMesh.geometry.parameters.depth;
     let h = boxMesh.geometry.parameters.height;
     let w = boxMesh.geometry.parameters.width;
 
+    // use the scale factor
+    w = w * boxMesh.el.object3D.scale.x;
+    h = h * boxMesh.el.object3D.scale.y;
+    d = d * boxMesh.el.object3D.scale.z;
+
     // fill box vertexes
-    const points = Array(8).fill(null).map(() => { 
-      return new THREE.Vector3(0, 0, 0).clone() 
+    const points = Array(8).fill(null).map(() => {
+      return new THREE.Vector3(0, 0, 0).clone()
     });
-    points[0].add(new THREE.Vector3(0,   h / 2, 0)).add(new THREE.Vector3(  w / 2, 0, 0));
-    points[1].add(new THREE.Vector3(0, - h / 2, 0)).add(new THREE.Vector3(  w / 2, 0, 0));
+    points[0].add(new THREE.Vector3(0, h / 2, 0)).add(new THREE.Vector3(w / 2, 0, 0));
+    points[1].add(new THREE.Vector3(0, - h / 2, 0)).add(new THREE.Vector3(w / 2, 0, 0));
     points[2].add(new THREE.Vector3(0, - h / 2, 0)).add(new THREE.Vector3(- w / 2, 0, 0));
-    points[3].add(new THREE.Vector3(0,   h / 2, 0)).add(new THREE.Vector3(- w / 2, 0, 0));
+    points[3].add(new THREE.Vector3(0, h / 2, 0)).add(new THREE.Vector3(- w / 2, 0, 0));
     // fill box vertexes
     for (let i = 0; i < 4; i++) {
-      points[i].add(new THREE.Vector3( 0, 0, d / 2));
-      points[i + 4] = points[i].clone().sub(new THREE.Vector3( 0, 0, d));
+      points[i].add(new THREE.Vector3(0, 0, d / 2));
+      points[i + 4] = points[i].clone().sub(new THREE.Vector3(0, 0, d));
     }
 
     points.forEach((p) => {
@@ -693,8 +739,8 @@ AFRAME.registerComponent("handy-component", {
     checkPoint.sub(startPoint);
 
     // aligning the vector of points 6 - 5 with X axis
-    let zeroPoint = new THREE.Vector3(0,0,0);
-    let xVector = new THREE.Vector3(1,0,0);
+    let zeroPoint = new THREE.Vector3(0, 0, 0);
+    let xVector = new THREE.Vector3(1, 0, 0);
     let alignAngle = xVector.angleTo(points[5]);
     let perpsAxis = zeroPoint.crossVectors(xVector, points[5]).normalize();
     let qRotation = new THREE.Quaternion();
@@ -707,7 +753,7 @@ AFRAME.registerComponent("handy-component", {
     checkPoint.applyMatrix4(alignMatrix);
 
     // aligning the vector of points 6 - 7 with Y axis
-    let yVector = new THREE.Vector3(0,1,0);
+    let yVector = new THREE.Vector3(0, 1, 0);
     alignAngle = yVector.angleTo(points[7]);
 
     qRotation = new THREE.Quaternion();
@@ -723,14 +769,14 @@ AFRAME.registerComponent("handy-component", {
     // this.drawLine([points[6], points[7]], 'blue');
     // this.drawLine([points[6], points[2]], 'red');
 
-    if(checkPoint.x > 0 && checkPoint.x < points[5].x
+    if (checkPoint.x > 0 && checkPoint.x < points[5].x
       && checkPoint.y > 0 && checkPoint.y < points[7].y
       && checkPoint.z > 0 && checkPoint.z < points[2].z
-      ) return true;
+    ) return true;
 
     return false;
   },
-  
+
   // Check if tip of index finger is close to the ui panel.
   calculateUiBoundBox(movable, indexTip) {
     let h = movable.children[0].geometry.parameters.height;
@@ -800,6 +846,7 @@ AFRAME.registerComponent("handy-component", {
       controller.userData.selected = undefined;
       this.spherePos = null;
     }
+    this.helpBoxScaleDistance = null;
   },
   // check controllers mode switching (hand <-> controllers)
   onConnected(event) {
@@ -933,11 +980,11 @@ AFRAME.registerComponent("handy-component", {
 
   everySecond: function () {
     if (this.isControlleraHand) {
-      // Check if tip of the index finger 
-      this.tipIsInTheBox =
+      // Check if the tip of the index finger is close to the UI panel
+      let tipIsInTheBox =
         this.calculateUiBoundBox(this.uiPanel.object3D, this.handR.joints['index-finger-tip'])
         || this.calculateUiBoundBox(this.uiPanel.object3D, this.handL.joints['index-finger-tip']);
-      if (this.tipIsInTheBox) {
+      if (tipIsInTheBox) {
         document.getElementById('my-interface').style.background = 'antiquewhite';
         if (!this.isClickedByTip) {
           this.isClickedByTip = this.clickByTip(this.handR.joints['index-finger-tip'])
@@ -955,17 +1002,30 @@ AFRAME.registerComponent("handy-component", {
         let dtL = this.handL.joints['middle-finger-tip'].position
           .distanceTo(this.handL.joints['thumb-tip'].position);
 
+        let middlePinchTreshold = 0.02;
 
 
-
-        if (dtR < 0.02) {
+        if (dtR < middlePinchTreshold) {
+          // right middle pinch detected
           this.repositionUiPanel(this.handR.joints['middle-finger-tip'].position.clone());
         }
-        if (dtL < 0.02) {
+
+        if (dtL < middlePinchTreshold) {
+          // left middle pinch detected
           this.repositionUiPanel(this.handL.joints['middle-finger-tip'].position.clone());
         }
       }
 
+      // both hand pinch
+      if (this.helpBoxScaleDistance) {
+        let pinchesDistance = this.handL.joints['wrist'].position
+          .distanceTo(this.handR.joints['wrist'].position);
+        let oldScale = document.getElementById('help_obj_box').object3D.scale.x;
+        let newScale = oldScale * pinchesDistance / this.helpBoxScaleDistance;
+        this.helpBoxScaleDistance = pinchesDistance;
+        document.getElementById('statusText').innerHTML = 'newScale: ' + newScale;
+        document.getElementById('help_obj_box').object3D.scale.set(newScale, newScale, newScale);
+      }
 
     }
   },
@@ -1024,6 +1084,8 @@ AFRAME.registerComponent("handy-component", {
   },
   tick() {
     this.throttledFunction();
+
+    // The branch sphere is squeezed or pinched
     if (this.squeezedByRight || this.squeezedByLeft) {
       this.redrawTriangle();
     }
