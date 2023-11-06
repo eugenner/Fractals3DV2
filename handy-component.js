@@ -94,35 +94,35 @@ AFRAME.registerComponent("handy-component", {
 
     document.getElementById("help_obj").addEventListener('model-loaded', (evt) => {
       const aabb = new THREE.Box3().setFromObject(evt.target.object3D);
+      const aabbSize = aabb.getSize(new THREE.Vector3());
       const helpObjBox = document.createElement('a-entity');
       helpObjBox.setAttribute('id', 'help_obj_box');
+      helpObjBox.setAttribute('visible', false);
       helpObjBox.setAttribute('geometry', {
         primitive: 'box',
-        depth: aabb.max.z - aabb.min.z,
-        height: aabb.max.y - aabb.min.y,
-        width: aabb.max.x - aabb.min.x
+        depth: aabbSize.z,
+        height: aabbSize.y,
+        width: aabbSize.x
       });
       helpObjBox.setAttribute('material', {
         color: 'blue',
-        opacity: 0.1
+        opacity: 0.3
       });
+
       helpObjBox.classList.add('movable');
+      this.movables.push(helpObjBox.object3D);
 
       const midpoint = new THREE.Vector3();
       midpoint.copy(aabb.min).add(aabb.max).multiplyScalar(0.5);
-      helpObjBox.object3D.position.copy(midpoint);
-
-      this.el.appendChild(helpObjBox);
+      // correct position of the origin point (it can be not centered at all)
+      evt.target.object3D.position.sub(midpoint);
 
       helpObjBox.object3D.add(evt.target.object3D);
+
       helpObjBox.object3D.rotation.x = - Math.PI / 2; // TODO improve initial position (rotation!) of .glb
       helpObjBox.object3D.position.set(0, 1.5, -1);
 
-      // TODO improve this: 
-      // this.movables potentionally could be initialized later 
-      this.movables.push(helpObjBox.object3D);
-
-
+      this.el.appendChild(helpObjBox);
     });
 
     this.el.sceneEl.addEventListener('loaded', (sceneEvt) => {
@@ -398,10 +398,9 @@ AFRAME.registerComponent("handy-component", {
 
       const showHelp = (evt) => {
         const helpObj = document.getElementById("help_obj").object3D;
-        const aabb = new THREE.Box3().setFromObject(helpObj);
-        console.log(aabb)
-
-        this.drawLine([aabb.min, aabb.max], 'red');
+        const helpObjBox = document.getElementById("help_obj_box").object3D;
+        helpObj.visible = !helpObj.visible;
+        helpObjBox.visible = !helpObjBox.visible;
       }
 
       document.getElementById("help").onclick = (evt) => {
