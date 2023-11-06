@@ -112,10 +112,10 @@ AFRAME.registerComponent("handy-component", {
       helpObjBox.classList.add('movable');
       this.movables.push(helpObjBox.object3D);
 
-      const midpoint = new THREE.Vector3();
-      midpoint.copy(aabb.min).add(aabb.max).multiplyScalar(0.5);
       // correct position of the origin point (it can be not centered at all)
-      evt.target.object3D.position.sub(midpoint);
+      const modelRealCenterPoint = new THREE.Vector3();
+      modelRealCenterPoint.copy(aabb.min).add(aabb.max).multiplyScalar(0.5);
+      evt.target.object3D.position.sub(modelRealCenterPoint);
 
       helpObjBox.object3D.add(evt.target.object3D);
 
