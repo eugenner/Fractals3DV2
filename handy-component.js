@@ -28,7 +28,7 @@ AFRAME.registerComponent("handy-component", {
     this.controller2 = null;
     this.head = null;
 
-    this.throttledFunction = AFRAME.utils.throttle(this.everySecond, 100, this);
+    this.throttledFunction = AFRAME.utils.throttle(this.everySecond, 10, this);
 
 
     this.tmpVector1 = new THREE.Vector3();
@@ -40,6 +40,7 @@ AFRAME.registerComponent("handy-component", {
     this.movables = [];
     this.hands = [];
 
+    this.isImmersive = false;
 
     this.raycaster = new THREE.Raycaster();
     this.intersected = [];
@@ -80,7 +81,9 @@ AFRAME.registerComponent("handy-component", {
       presets.push(treeDataOut);
     });
 
-
+    this.el.sceneEl.addEventListener("enter-vr", () => {
+      this.isImmersive = true;
+    });
     /*
         this.el.sceneEl.addEventListener("enter-vr", () => {
           for (const name of ["select", "selectstart", "selectend", "squeeze", "squeezeend", "squeezestart"])
@@ -119,8 +122,9 @@ AFRAME.registerComponent("handy-component", {
 
       helpObjBox.object3D.add(evt.target.object3D);
 
-      helpObjBox.object3D.rotation.x = - Math.PI / 2; // TODO improve initial position (rotation!) of .glb
-      helpObjBox.object3D.position.set(0, 1.5, -1);
+      // helpObjBox.object3D.rotation.x = - Math.PI / 2; // TODO improve initial position (rotation!) of .glb
+      helpObjBox.object3D.position.set(0, 0, 0);
+      // helpObjBox.object3D.up = new THREE.Vector3(0,0,-1);
 
       this.el.appendChild(helpObjBox);
     });
@@ -394,6 +398,7 @@ AFRAME.registerComponent("handy-component", {
       const exitXR = () => {
         let aframeScene = document.querySelector("a-scene");
         aframeScene.exitVR();
+        this.isImmersive = false;
       }
 
       const showHelp = (evt) => {
@@ -401,7 +406,21 @@ AFRAME.registerComponent("handy-component", {
         const helpObjBox = document.getElementById("help_obj_box").object3D;
         helpObj.visible = !helpObj.visible;
         helpObjBox.visible = !helpObjBox.visible;
+        if(helpObj.visible) {
+          // position Help 3d model above ui-panel
+          const uiPanel = document.getElementById('ui-panel');
+          helpObjBox.scale.setScalar(0.3);
+          helpObjBox.position.copy(uiPanel.object3D.getWorldPosition(new THREE.Vector3()));
+          helpObjBox.rotation.copy(uiPanel.object3D.rotation);
+          helpObjBox.rotateX(- Math.PI / 2);
+
+          // TODO now it is ok to use Z-direction, but later it can be need to use Y
+          const adjustVector = helpObjBox.getWorldDirection(new THREE.Vector3());
+          adjustVector.multiplyScalar(0.4);
+          helpObjBox.position.add(adjustVector);
+        } 
       }
+
 
       document.getElementById("help").onclick = (evt) => {
         showHelp(evt);
