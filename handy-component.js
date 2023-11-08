@@ -7,7 +7,7 @@ const fractalRootOrigin = new THREE.Vector3(0, 1, 0);
 let fractalTree = [];
 let branchTriangles = new Map(); // array of lines: [ind, [orig-forward, orig-perp, forward-perp]]
 let branchMeshTriangles = new Map(); // array of triangles
-let lines = []; // lines of the tree
+// let lines = []; // lines of the tree
 let segments = []; // lines of the tree
 const base = [
   new THREE.Vector3(0, 0, 0), // [0] - center of triangle
@@ -302,9 +302,9 @@ AFRAME.registerComponent("handy-component", {
       const generateTree = () => {
         let aframeScene = document.querySelector("a-scene");
         let threeScene = aframeScene.object3D;
-        lines.forEach((l) => {
-          threeScene.remove(l);
-        });
+        // lines.forEach((l) => {
+        //   threeScene.remove(l);
+        // });
         let branches = [];
         fractalTree.forEach((branch) => {
           let forwarWorldPos = new THREE.Vector3();
@@ -330,7 +330,7 @@ AFRAME.registerComponent("handy-component", {
 
       const randomTree = () => {
         presets[Math.floor(Math.random() * presets.length)].forEach((triangle) => {
-          addBranch(null, triangle[1], triangle[2], true);
+          addBranch(null, triangle[1].clone(), triangle[2].clone(), true);
         });
       }
 
