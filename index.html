@@ -95,9 +95,11 @@
       </a-sphere>
       <a-sphere id="ball2" class="movable" color="blue" radius="0.25"
         position="-0.5 0.8 -0.5" visible="true"
-        material="color: blue; opacity: 0.5;">
+        material="color: blue; opacity: 0.5;"></a-sphere>
 
-      </a-sphere>
+
+      <a-sphere id="scaled_tree" class="movable"  radius="0.05" position="0 0.25 0" material="color: yellow; opacity: 0.5;"></a-sphere>
+
       <a-entity id="ui-panel" class="movable"
         html="cursor:#cursor;html:#my-interface"
         position="0.7 1 -1" material="opacity: 0.5;">
@@ -105,8 +107,7 @@
 
       <a-light id="dirlight" intensity="1"
         light="castShadow:false;type:directional" position="40 80 10"></a-light>
-      <a-light type="hemisphere" ground-color="orange" color="white"
-        intensity="0"></a-light>
+      <a-light type="hemisphere" ground-color="orange" color="white" intensity="0"></a-light>
       <!-- <a-circle hide-on-enter-ar shadow="cast:false" class="navmesh" rotation="-90 0 0" radius="6"
         material="shader:phong;color:white;"></a-circle> -->
       <!-- <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0" environment="lighting:none;preset:yavapai;skyType:atmosphere;"></a-entity> -->
