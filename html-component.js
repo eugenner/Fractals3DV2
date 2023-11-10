@@ -1,8 +1,3 @@
-// import { HTMLMesh } from "/node_modules/three/examples/jsm/interactive/HTMLMesh.js";
-// import { HTMLMesh } from "/node_modules/super-three/examples/jsm/interactive/HTMLMesh.js";
-// import { THREE } from '/node_modules/three';
-// import * as THREE from 'three';
-
 import { HTMLMesh } from "./HTMLMesh.js"
 
 const schemaHTML = {

@@ -7,8 +7,10 @@ const fractalRootOrigin = new THREE.Vector3(0, 1, 0);
 let fractalTree = [];
 let branchTriangles = new Map(); // array of lines: [ind, [orig-forward, orig-perp, forward-perp]]
 let branchMeshTriangles = new Map(); // array of triangles
-// let lines = []; // lines of the tree
-let segments = []; // lines of the tree
+
+let segments = []; // segment of lines of the tree
+let scaledSegments = []; // segment of lines of the tree for closer observe by user
+
 const base = [
   new THREE.Vector3(0, 0, 0), // [0] - center of triangle
   new THREE.Vector3(0, 1, 0), // forward vector
@@ -134,7 +136,6 @@ AFRAME.registerComponent("handy-component", {
       this.tScene = this.el.sceneEl.object3D;
       this.uiPanel = document.getElementById('ui-panel');
 
-
       Array.from(document.getElementsByClassName('movable')).forEach((el) => {
         this.movables.push(el.object3D);
       });
@@ -255,18 +256,29 @@ AFRAME.registerComponent("handy-component", {
 
       // Worker for the fractals tree calculation
       const worker = new Worker('worker.js');
-
+      const component = this;
       // Get worker result 
       worker.onmessage = function (event) {
         drawTree(event.data.lines);
 
         document.getElementById('statusText').innerHTML = 'Ready';
         document.getElementById("generateTree").style.backgroundColor = defaultBgColor;
+
+        // place the scaled tree close to ui panel
+        if(component.isImmersive) {
+          const scaledTree = document.getElementById("scaled_tree").object3D;
+          const uiPanel = document.getElementById("ui-panel");
+          scaledTree.position.copy(uiPanel.object3D.getWorldPosition(new THREE.Vector3()));
+          const adjustVector = new THREE.Vector3(0,1,0);
+          adjustVector.multiplyScalar(0.4);
+          scaledTree.position.add(adjustVector);
+        }
       };
 
       const drawTree = (data) => {
         let aframeScene = document.querySelector("a-scene");
         let threeScene = aframeScene.object3D;
+        let scaledTreeRoot = document.getElementById('scaled_tree');
 
         let maxLevel = 3; // TODO setup this from UI
         let levelColors = [];
@@ -277,10 +289,16 @@ AFRAME.registerComponent("handy-component", {
 
         data.forEach((levelData, lvl) => {
           let lg = new THREE.BufferGeometry().setFromPoints(levelData);
+          let scaledLg = lg.clone().scale(0.1,0.1,0.1);
           const lm = new THREE.LineBasicMaterial({ color: levelColors[lvl] });
           let segment = new THREE.LineSegments(lg, lm);
           segments.push(segment);
           threeScene.add(segment);
+
+          // TODO improve this
+          let scaledSegment = new THREE.LineSegments(scaledLg, lm);
+          scaledSegments.push(scaledSegment);
+          scaledTreeRoot.object3D.add(scaledSegment);
         })
       };
 
@@ -355,7 +373,12 @@ AFRAME.registerComponent("handy-component", {
         segments.forEach((s) => {
           threeScene.remove(s);
         });
+        let scaledTreeRoot = document.getElementById('scaled_tree');
+        scaledSegments.forEach((s) => {
+          scaledTreeRoot.object3D.remove(s);
+        });
       };
+      
 
       document.getElementById("clearTree").onclick = (evt) => {
         const el = evt.currentTarget;
@@ -797,8 +820,9 @@ AFRAME.registerComponent("handy-component", {
 
   // Check if tip of index finger is close to the ui panel.
   calculateUiBoundBox(movable, indexTip) {
-    let h = movable.children[0].geometry.parameters.height;
-    let w = movable.children[0].geometry.parameters.width;
+    const panelMesh = movable.children.filter(c => c.type == 'Mesh')[0];
+    let h = panelMesh.geometry.parameters.height;
+    let w = panelMesh.geometry.parameters.width;
     let d = 0.01; // depth
     let diag = Math.sqrt(Math.pow(h, 2) + Math.pow(w, 2) + Math.pow(d, 2)) + 0.03;
     const points = Array(8).fill(null).map(() => { return new THREE.Vector3(0, 0, 0).clone() });
