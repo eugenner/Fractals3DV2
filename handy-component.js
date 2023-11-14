@@ -212,6 +212,7 @@ AFRAME.registerComponent("handy-component", {
 
 
       document.getElementById("addBranch").onclick = (evt) => {
+        playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
         addBranch();
@@ -227,6 +228,7 @@ AFRAME.registerComponent("handy-component", {
       };
 
       document.getElementById("removeBranch").onclick = (evt) => {
+        playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
         removeBranch();
@@ -241,6 +243,7 @@ AFRAME.registerComponent("handy-component", {
       };
 
       document.getElementById("removeAllBranches").onclick = (evt) => {
+        playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
         removeAllBranches();
@@ -302,19 +305,9 @@ AFRAME.registerComponent("handy-component", {
         })
       };
 
-      // TODO should be THREE.LineSegments used?
-      const drawTree2 = () => {
-        let aframeScene = document.querySelector("a-scene");
-        let threeScene = aframeScene.object3D;
-        let lg = new THREE.BufferGeometry().setFromPoints(fractalTreePairsPoints);
-        const lm = new THREE.LineBasicMaterial({ vertexColors: true });
-        const colors = new Float32Array(fractalTreePairsPointsColor.flatMap(c => c.toArray()));
-        lg.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-        let segment = new THREE.LineSegments(lg, lm);
-        segment.material.depthTest = false;
-        segments.push(segment);
-        threeScene.add(segment);
+      const playClickSound = () => {
+        const head = document.getElementById("head");
+        head.components.sound.playSound();
       }
 
       const generateTree = () => {
@@ -341,6 +334,7 @@ AFRAME.registerComponent("handy-component", {
       }
       // Run task in worker
       document.getElementById("generateTree").onclick = (evt) => {
+        playClickSound();
         evt.currentTarget.style.backgroundColor = defaultBgClickedColor;
         document.getElementById('statusText').innerHTML = 'Calculation';
         generateTree();
@@ -353,6 +347,7 @@ AFRAME.registerComponent("handy-component", {
       }
 
       document.getElementById("addRandomTree").onclick = (evt) => {
+        playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
         removeAllBranches();
@@ -381,6 +376,7 @@ AFRAME.registerComponent("handy-component", {
       
 
       document.getElementById("clearTree").onclick = (evt) => {
+        playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
 
@@ -399,6 +395,7 @@ AFRAME.registerComponent("handy-component", {
       });
 
       const switchLight = (mode) => {
+        playClickSound();
         const dayEnvironment = "lighting:none;preset:yavapai;skyType:atmosphere;";
         const nightEnvironment = "lighting:none;preset:starry;skyType:atmosphere;";
 
@@ -446,6 +443,7 @@ AFRAME.registerComponent("handy-component", {
 
 
       document.getElementById("help").onclick = (evt) => {
+        playClickSound();
         showHelp(evt);
       }
 
