@@ -535,7 +535,9 @@ AFRAME.registerComponent("handy-component", {
           // alphaMap: this.triangleMeshTexture,
           opacity: 0.1,
           transparent: true,
-          side: THREE.DoubleSide
+          side: THREE.DoubleSide,
+          // alphaTest: 0.5,
+          depthWrite: false
 
         });
         const meshTriangle = new THREE.Mesh(geometry, material)
