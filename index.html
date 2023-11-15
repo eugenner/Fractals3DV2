@@ -63,7 +63,9 @@
   <body>
     <a-scene handy-component shadow="type: pcfsoft"
       webxr="optionalFeatures:hand-tracking,dom-overlay;overlayElement:#dom-overlay;"
-      render-order="background, menu, menubutton, menutext, foreground, hud">
+      render-order="background, menu, menubutton, menutext, foreground, hud"
+      sound="src: url(simple-piano-melody-9834.mp3); loop: true;"
+      >
       <a-assets>
         <a-sphere id="branch_" ind color="green" radius="0.025" class="branch clickable"><a-sphere id="branch_perp_" ind color="red" radius="0.0125" class="branch_perp clickable" position="0.25 -0.5 0"></a-sphere></a-sphere>
         <a-asset-item id="help_model" src="./help.glb"></a-asset-item>
@@ -159,6 +161,15 @@
             <label>Iterations:</label>
             <label id="iterationsVal" style="margin-left: 5px;">4</label>
             <input type="range" id="rangeIterations" min="2" max="8" step="1" value="4" style="margin-left: 15px;"/>
+          </div>
+          <div style="padding-top: 5px;">
+            <label>Music: </label>
+            <input name="switchMusic" type="radio" id="music-on"
+              name="music" value="on" checked>
+            <label>On</label>
+            <input name="switchMusic" type="radio" id="music-off"
+              name="music" value="off">
+            <label>Off</label>
           </div>
         </fieldset>
         

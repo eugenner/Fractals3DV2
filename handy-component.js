@@ -44,6 +44,7 @@ AFRAME.registerComponent("handy-component", {
     this.hands = [];
 
     this.isImmersive = false;
+    this.isMusicOn = true;
 
     this.raycaster = new THREE.Raycaster();
     this.intersected = [];
@@ -136,6 +137,8 @@ AFRAME.registerComponent("handy-component", {
 
       this.tScene = this.el.sceneEl.object3D;
       this.uiPanel = document.getElementById('ui-panel');
+
+      this.el.sceneEl.components.sound.playSound();
 
       Array.from(document.getElementsByClassName('movable')).forEach((el) => {
         this.movables.push(el.object3D);
@@ -457,6 +460,21 @@ AFRAME.registerComponent("handy-component", {
         showHelp(evt);
       }
 
+      const switchMusic = (mode) => {
+          this.isMusicOn = mode == 'on';
+          if(this.isMusicOn) {
+            this.el.sceneEl.components.sound.playSound();
+          } else {
+            this.el.sceneEl.components.sound.stopSound();
+          }
+      }
+
+      const switchMusicButtons = document.querySelectorAll('input[type="radio"][name="switchMusic"]');
+      switchMusicButtons.forEach((btn) => {
+        btn.addEventListener('click', function () {
+          switchMusic(this.value);
+        });
+      });
       // --- fractal tree managment logic ---
 
       const drawLine = (points, color) => {
