@@ -400,6 +400,7 @@ AFRAME.registerComponent("handy-component", {
 
       const switchLight = (mode) => {
         playClickSound();
+        this.el.sceneEl.components.sound.stopSound();
         const dayEnvironment = "lighting:none;preset:yavapai;skyType:atmosphere;";
         const nightEnvironment = "lighting:none;preset:starry;skyType:atmosphere;";
 
@@ -408,11 +409,15 @@ AFRAME.registerComponent("handy-component", {
         if (mode == 'day') {
           dirlightEl.setAttribute('intensity', '1');
           environmentEl.setAttribute('environment', dayEnvironment);
+          this.el.sceneEl.setAttribute('sound', 'src: url(simple-piano-melody-9834.mp3); loop: true;');
         } else {
           dirlightEl.setAttribute('intensity', '0');
           environmentEl.setAttribute('environment', nightEnvironment);
+          this.el.sceneEl.setAttribute('sound', 'src: url(sunrise_105.mp3); loop: true;');
         }
-
+        if(this.isMusicOn) {
+          this.el.sceneEl.components.sound.playSound();
+        }
       }
 
       const setIterations = (evt) => {
