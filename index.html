@@ -147,14 +147,21 @@
           <button id="clearTree" style="margin-right: 5px;">Clear</button>
         </fieldset>
         <fieldset style="border:0 none;border-top: 1px solid grey;">
-          <legend>Light</legend>
+          <legend>Settings</legend>
+          <label>Light: </label>
           <input name="switchLight" type="radio" id="light-day"
             name="light" value="day" checked>
           <label>Day</label>
           <input name="switchLight" type="radio" id="light-night"
             name="light" value="night">
           <label>Night</label>
+          <div style="display: flex; align-items: center; padding-top: 5px;">
+            <label>Iterations:</label>
+            <label id="iterationsVal" style="margin-left: 5px;">4</label>
+            <input type="range" id="rangeIterations" min="2" max="8" step="1" value="4" style="margin-left: 15px;"/>
+          </div>
         </fieldset>
+        
         <hr>
         <div style="display: flex; align-items: center;">
           <div style="flex: 0; text-align: left;">Status:</div>

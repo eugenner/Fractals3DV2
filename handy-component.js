@@ -29,6 +29,7 @@ AFRAME.registerComponent("handy-component", {
     this.controller1 = null;
     this.controller2 = null;
     this.head = null;
+    this.iterationsNo = 4;
 
     this.throttledFunction = AFRAME.utils.throttle(this.everySecond, 10, this);
 
@@ -283,23 +284,23 @@ AFRAME.registerComponent("handy-component", {
         let threeScene = aframeScene.object3D;
         let scaledTreeRoot = document.getElementById('scaled_tree');
 
-        let maxLevel = 3; // TODO setup this from UI
         let levelColors = [];
-        for (let l = 0; l <= maxLevel; l++) {
-          levelColors.push(new THREE.Color(0x0000FF));
+        for (let l = 1; l < this.iterationsNo; l++) {
+          levelColors.push('blue');
         }
-        levelColors.push(new THREE.Color(0xFFFFFF));
+        levelColors.push('white');
 
         data.forEach((levelData, lvl) => {
+
           let lg = new THREE.BufferGeometry().setFromPoints(levelData);
           let scaledLg = lg.clone().scale(0.1,0.1,0.1);
-          const lm = new THREE.LineBasicMaterial({ color: levelColors[lvl] });
-          let segment = new THREE.LineSegments(lg, lm);
+          let lm = new THREE.LineBasicMaterial({ color: levelColors[lvl] });
+          let segment = new THREE.LineSegments(lg, lm.clone());
           segments.push(segment);
           threeScene.add(segment);
 
           // TODO improve this
-          let scaledSegment = new THREE.LineSegments(scaledLg, lm);
+          let scaledSegment = new THREE.LineSegments(scaledLg, lm.clone());
           scaledSegments.push(scaledSegment);
           scaledTreeRoot.object3D.add(scaledSegment);
         })
@@ -330,7 +331,7 @@ AFRAME.registerComponent("handy-component", {
           ]);
         })
         // drawFractal(base, branches, 1);
-        worker.postMessage({ 'base': base, 'branches': branches });
+        worker.postMessage({ 'base': base, 'branches': branches, 'iterations': this.iterationsNo });
       }
       // Run task in worker
       document.getElementById("generateTree").onclick = (evt) => {
@@ -411,6 +412,15 @@ AFRAME.registerComponent("handy-component", {
 
       }
 
+      const setIterations = (evt) => {
+        this.iterationsNo = evt.target.valueAsNumber;
+        document.getElementById("iterationsVal").innerText = evt.target.value;
+      }
+
+      document.getElementById("rangeIterations").onclick = (evt) => {
+        setIterations(evt);
+      }
+
       document.getElementById("exitXR").onclick = (evt) => {
         exitXR();
       }
@@ -470,8 +480,10 @@ AFRAME.registerComponent("handy-component", {
 
         const clonedEntity = cloneWithChildren(originalEntity);
         clonedEntity.setAttribute('ind', fractalTree.length + 1);
+        clonedEntity.classList.add('movable');
         clonedEntity.object3D.position.copy(branchPos);
         let perp = clonedEntity.getChildren().find((el) => el.id.startsWith('branch_perp_'));
+        perp.classList.add('movable');
         perp.setAttribute('ind', fractalTree.length + 1);
         if (perpAbs) {
           branchPerpPos.sub(branchPos);
@@ -1063,7 +1075,7 @@ AFRAME.registerComponent("handy-component", {
         let oldScale = document.getElementById('help_obj_box').object3D.scale.x;
         let newScale = oldScale * pinchesDistance / this.helpBoxScaleDistance;
         this.helpBoxScaleDistance = pinchesDistance;
-        document.getElementById('statusText').innerHTML = 'newScale: ' + newScale;
+        // document.getElementById('statusText').innerHTML = 'newScale: ' + newScale;
         document.getElementById('help_obj_box').object3D.scale.set(newScale, newScale, newScale);
       }
 
