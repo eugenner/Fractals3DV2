@@ -1,13 +1,18 @@
 importScripts('node_modules/super-three/build/three.js'); 
 
-let lines = [[],[],[],[],[],[]]; // TODO set by number of fractal tree levels
-
+let lines = [];
 
 self.onmessage = function(event) {
     const data = event.data;
-    lines = [[],[],[],[],[],[]];
-    
-    drawFractal(convertToT3Obj(data.base), convertToT3Obj(data.branches), 1);
+
+    for(let n = 0; n < data.iterations; n++) {
+      lines.push(new Array());
+    }
+
+    drawFractal(convertToT3Obj(data.base), 
+      convertToT3Obj(data.branches), 
+      1, 
+      data.iterations);
     // Perform some time-consuming task
     // const result = performTask(data);
     
@@ -41,14 +46,14 @@ self.onmessage = function(event) {
     return result;
   }
   
-  const drawFractal = (base, branches, level) => {
+  const drawFractal = (base, branches, level, maxLevel) => {
 
     // lines[level - 1].push([base[0], base[1]]);
     branches.forEach((b) => {
       lines[level - 1].push(b[0], b[1]);
     });
 
-    if (level > 4)
+    if (level >= maxLevel)
       return;
 
     // 1. Scale relative to base
@@ -64,7 +69,7 @@ self.onmessage = function(event) {
     var positioned = moveInPosition(alignedPlaneBranches);
 
     positioned.forEach((p) => {
-      drawFractal(p[0], p.splice(1), level + 1);
+      drawFractal(p[0], p.splice(1), level + 1, maxLevel);
     });
   }
 
