@@ -5,6 +5,7 @@ let lines = [];
 self.onmessage = function(event) {
     const data = event.data;
 
+    lines.length = 0;
     for(let n = 0; n < data.iterations; n++) {
       lines.push(new Array());
     }
@@ -21,7 +22,7 @@ self.onmessage = function(event) {
       // TODO data exchange between main thread and worker's thread can't be rich Object type
       // and should be serialized !
       self.postMessage({'lines': lines});
-    }, 3000);
+    }, 500);
 
   };
 
