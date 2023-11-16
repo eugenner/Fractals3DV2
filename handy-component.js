@@ -73,6 +73,26 @@ AFRAME.registerComponent("handy-component", {
 
     const presets = [];
 
+    const showBaseTriangle = () => {
+      let points = [new THREE.Vector3(), fractalRootOrigin, new THREE.Vector3(0.25, 0, 0)];
+      let geometry = new THREE.BufferGeometry().setFromPoints(points);
+      geometry.computeVertexNormals(); // TODO check if this is required
+
+      const material = new THREE.MeshBasicMaterial({
+        // TODO choose way for transparency
+        // alphaMap: this.triangleMeshTexture,
+        opacity: 0.5,
+        transparent: true,
+        side: THREE.DoubleSide,
+        // alphaTest: 0.5,
+        depthWrite: false
+
+      });
+      const meshTriangle = new THREE.Mesh(geometry, material)
+
+      this.tScene.add(meshTriangle);
+    }
+
     RandomTreeData.forEach((treeData, i) => {
       let treeDataOut = [];
       treeData.forEach((tr) => {
@@ -139,6 +159,7 @@ AFRAME.registerComponent("handy-component", {
       this.uiPanel = document.getElementById('ui-panel');
 
       this.el.sceneEl.components.sound.playSound();
+      showBaseTriangle();
 
       Array.from(document.getElementsByClassName('movable')).forEach((el) => {
         this.movables.push(el.object3D);
@@ -292,18 +313,20 @@ AFRAME.registerComponent("handy-component", {
           levelColors.push('blue');
         }
         levelColors.push('white');
+        
+        data[0].push({x: 0, y: 0, z: 0}, {x: 0, y: 1, z: 0});
 
         data.forEach((levelData, lvl) => {
 
           let lg = new THREE.BufferGeometry().setFromPoints(levelData);
           let scaledLg = lg.clone().scale(0.1,0.1,0.1);
           let lm = new THREE.LineBasicMaterial({ color: levelColors[lvl] });
-          let segment = new THREE.LineSegments(lg, lm.clone());
+          let segment = new THREE.LineSegments(lg, lm);
           segments.push(segment);
           threeScene.add(segment);
 
           // TODO improve this
-          let scaledSegment = new THREE.LineSegments(scaledLg, lm.clone());
+          let scaledSegment = new THREE.LineSegments(scaledLg, lm);
           scaledSegments.push(scaledSegment);
           scaledTreeRoot.object3D.add(scaledSegment);
         })
@@ -316,10 +339,7 @@ AFRAME.registerComponent("handy-component", {
 
       const generateTree = () => {
         let aframeScene = document.querySelector("a-scene");
-        let threeScene = aframeScene.object3D;
-        // lines.forEach((l) => {
-        //   threeScene.remove(l);
-        // });
+        clearTree();
         let branches = [];
         fractalTree.forEach((branch) => {
           let forwarWorldPos = new THREE.Vector3();
@@ -333,7 +353,6 @@ AFRAME.registerComponent("handy-component", {
             new THREE.Vector3(0, 1, 0)
           ]);
         })
-        // drawFractal(base, branches, 1);
         worker.postMessage({ 'base': base, 'branches': branches, 'iterations': this.iterationsNo });
       }
       // Run task in worker
@@ -399,7 +418,6 @@ AFRAME.registerComponent("handy-component", {
       });
 
       const switchLight = (mode) => {
-        playClickSound();
         this.el.sceneEl.components.sound.stopSound();
         const dayEnvironment = "lighting:none;preset:yavapai;skyType:atmosphere;";
         const nightEnvironment = "lighting:none;preset:starry;skyType:atmosphere;";
@@ -568,6 +586,8 @@ AFRAME.registerComponent("handy-component", {
         branchMeshTriangles.set(parseInt(newBranch.getAttribute('ind')), meshTriangle);
         this.tScene.add(meshTriangle);
       }
+
+
 
       // Remove the last branch from the tree
       const removeBranch = () => {
