@@ -420,14 +420,15 @@ AFRAME.registerComponent("handy-component", {
         }
       }
 
-      const setIterations = (evt) => {
-        this.iterationsNo = evt.target.valueAsNumber;
-        document.getElementById("iterationsVal").innerText = evt.target.value;
+      const setIterations = (val) => {
+        document.getElementById("iterationsVal").innerText = val;
+        this.iterationsNo = val;
       }
 
-      document.getElementById("rangeIterations").onclick = (evt) => {
-        setIterations(evt);
-      }
+      document.getElementById("rangeIterations").addEventListener('input', function(event) {
+        setIterations(event.target.value);
+      });
+
 
       document.getElementById("exitXR").onclick = (evt) => {
         exitXR();
