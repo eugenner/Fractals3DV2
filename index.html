@@ -67,7 +67,7 @@
       sound="src: url(simple-piano-melody-9834.mp3); loop: true;"
       >
       <a-assets>
-        <a-sphere id="branch_" ind color="green" radius="0.025" class="branch clickable"><a-sphere id="branch_perp_" ind color="red" radius="0.0125" class="branch_perp clickable" position="0.25 -0.5 0"></a-sphere></a-sphere>
+        <a-sphere id="branch_" ind material="color: green; emissive: green; emissiveIntensity: 5" radius="0.025" class="branch clickable"><a-sphere id="branch_perp_" ind color="red" radius="0.0125" class="branch_perp clickable" position="0.25 -0.5 0"></a-sphere></a-sphere>
         <a-asset-item id="help_model" src="./help.glb"></a-asset-item>
       </a-assets>
 
@@ -110,11 +110,12 @@
 
       <a-light id="dirlight" intensity="1"
         light="castShadow:false;type:directional" position="40 80 10"></a-light>
-      <a-light type="hemisphere" ground-color="orange" color="white" intensity="0"></a-light>
+      <a-light type="hemisphere" ground-color="white" color="white" intensity="0"></a-light>
       <!-- <a-circle hide-on-enter-ar shadow="cast:false" class="navmesh" rotation="-90 0 0" radius="6"
         material="shader:phong;color:white;"></a-circle> -->
       <!-- <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0" environment="lighting:none;preset:yavapai;skyType:atmosphere;"></a-entity> -->
-      <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0" environment="lighting:none;preset:yavapai;skyType:atmosphere;"></a-entity>
+      <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0" environment="lighting:none; preset:yavapai; skyType:atmosphere; 
+        groundColor:white; groundColor2: #afd5fd; dressingColor: #f8bcfb;"></a-entity>
 
     </a-scene>
 
