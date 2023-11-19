@@ -44,7 +44,7 @@ AFRAME.registerComponent("handy-component", {
     this.hands = [];
 
     this.isImmersive = false;
-    this.isMusicOn = true;
+    this.isMusicOn = false;
 
     this.raycaster = new THREE.Raycaster();
     this.intersected = [];
@@ -107,6 +107,7 @@ AFRAME.registerComponent("handy-component", {
 
     this.el.sceneEl.addEventListener("enter-vr", () => {
       this.isImmersive = true;
+      playSoundOnStart();
     });
     /*
         this.el.sceneEl.addEventListener("enter-vr", () => {
@@ -118,6 +119,22 @@ AFRAME.registerComponent("handy-component", {
               });
         });
     */
+
+    const playSoundOnStart = (evt) => {
+      if(!this.isMusicOn) {
+        document.getElementById("melody").components.sound.playSound();
+        this.isMusicOn = true;
+        document.getElementById("music-off").removeAttribute('checked');
+        document.getElementById("music-on").setAttribute('checked', true);
+      }
+    }
+
+    document.getElementById("melody").addEventListener('sound-loaded', (evt) => {
+      console.log('sound-loaded');
+      // playSoundOnStart(evt);
+
+    });
+        
 
     document.getElementById("help_obj").addEventListener('model-loaded', (evt) => {
       const aabb = new THREE.Box3().setFromObject(evt.target.object3D);
@@ -153,12 +170,13 @@ AFRAME.registerComponent("handy-component", {
       this.el.appendChild(helpObjBox);
     });
 
+    // The main Scene is loaded
     this.el.sceneEl.addEventListener('loaded', (sceneEvt) => {
 
       this.tScene = this.el.sceneEl.object3D;
       this.uiPanel = document.getElementById('ui-panel');
 
-      this.el.sceneEl.components.sound.playSound();
+      
       showBaseTriangle();
 
       Array.from(document.getElementsByClassName('movable')).forEach((el) => {
@@ -418,7 +436,7 @@ AFRAME.registerComponent("handy-component", {
       });
 
       const switchLight = (mode) => {
-        this.el.sceneEl.components.sound.stopSound();
+        document.getElementById("melody").components.sound.stopSound();
         const dayEnvironment = "lighting:none;preset:yavapai;skyType:atmosphere;";
         const nightEnvironment = "lighting:none;preset:starry;skyType:atmosphere;";
 
@@ -427,14 +445,14 @@ AFRAME.registerComponent("handy-component", {
         if (mode == 'day') {
           dirlightEl.setAttribute('intensity', '1');
           environmentEl.setAttribute('environment', dayEnvironment);
-          this.el.sceneEl.setAttribute('sound', 'src: url(simple-piano-melody-9834.mp3); loop: true;');
+          document.getElementById("melody").setAttribute('sound', 'src: url(simple-piano-melody-9834.mp3); loop: true;');
         } else {
           dirlightEl.setAttribute('intensity', '0');
           environmentEl.setAttribute('environment', nightEnvironment);
-          this.el.sceneEl.setAttribute('sound', 'src: url(sunrise_105.mp3); loop: true;');
+          document.getElementById("melody").setAttribute('sound', 'src: url(sunrise_105.mp3); loop: true;');
         }
         if(this.isMusicOn) {
-          this.el.sceneEl.components.sound.playSound();
+          document.getElementById("melody").components.sound.playSound();
         }
       }
 
@@ -487,9 +505,9 @@ AFRAME.registerComponent("handy-component", {
       const switchMusic = (mode) => {
           this.isMusicOn = mode == 'on';
           if(this.isMusicOn) {
-            this.el.sceneEl.components.sound.playSound();
+            document.getElementById("melody").components.sound.playSound();
           } else {
-            this.el.sceneEl.components.sound.stopSound();
+            document.getElementById("melody").components.sound.stopSound();
           }
       }
 
