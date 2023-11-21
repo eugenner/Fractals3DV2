@@ -77,11 +77,10 @@
   
       <a-sphere color="red" radius="0.01" id="cursor" material="shader:flat"></a-sphere>
 
-      <!-- handy-cursor="rayOrigin: xrselect" -->
       <a-entity id="rig" position="0 0 0" rotation="0 0 0">
         <a-entity id="head"
-          camera="near:0.01;"
-          wasd-controls="acceleration:100"
+          camera="near: 0.01;"
+          wasd-controls="acceleration: 50"
           look-controls="pointerLockEnabled: false"
           position="0 1.65 0"
           sound="src: url(click.mp3); poolSize: 10;">

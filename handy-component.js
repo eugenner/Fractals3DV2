@@ -81,7 +81,7 @@ AFRAME.registerComponent("handy-component", {
       const material = new THREE.MeshBasicMaterial({
         // TODO choose way for transparency
         // alphaMap: this.triangleMeshTexture,
-        opacity: 0.5,
+        opacity: 0.4,
         transparent: true,
         side: THREE.DoubleSide,
         // alphaTest: 0.5,
@@ -106,6 +106,11 @@ AFRAME.registerComponent("handy-component", {
     });
 
     this.el.sceneEl.addEventListener("enter-vr", () => {
+      // adjust user position (to outstand little bit before a tree)
+      const rig = document.getElementById('rig');
+      rig.object3D.position.z = 0.5;
+
+
       this.isImmersive = true;
       playSoundOnStart();
     });
@@ -134,7 +139,7 @@ AFRAME.registerComponent("handy-component", {
       // playSoundOnStart(evt);
 
     });
-        
+
 
     document.getElementById("help_obj").addEventListener('model-loaded', (evt) => {
       const aabb = new THREE.Box3().setFromObject(evt.target.object3D);
@@ -149,34 +154,30 @@ AFRAME.registerComponent("handy-component", {
         width: aabbSize.x
       });
       helpObjBox.setAttribute('material', {
-        color: 'blue',
-        opacity: 0.3
+        color: 'white',
+        opacity: 0.1
       });
 
       helpObjBox.classList.add('movable');
       this.movables.push(helpObjBox.object3D);
 
-      // correct position of the origin point (it can be not centered at all)
+      // correct position of the origin point of the model (it can be not centered at all)
       const modelRealCenterPoint = new THREE.Vector3();
       modelRealCenterPoint.copy(aabb.min).add(aabb.max).multiplyScalar(0.5);
       evt.target.object3D.position.sub(modelRealCenterPoint);
 
       helpObjBox.object3D.add(evt.target.object3D);
-
-      // helpObjBox.object3D.rotation.x = - Math.PI / 2; // TODO improve initial position (rotation!) of .glb
       helpObjBox.object3D.position.set(0, 0, 0);
-      // helpObjBox.object3D.up = new THREE.Vector3(0,0,-1);
 
       this.el.appendChild(helpObjBox);
     });
 
     // The main Scene is loaded
     this.el.sceneEl.addEventListener('loaded', (sceneEvt) => {
-
+      const rig = document.getElementById('rig').object3D;
       this.tScene = this.el.sceneEl.object3D;
       this.uiPanel = document.getElementById('ui-panel');
 
-      
       showBaseTriangle();
 
       Array.from(document.getElementsByClassName('movable')).forEach((el) => {
@@ -211,7 +212,8 @@ AFRAME.registerComponent("handy-component", {
       this.controller1.addEventListener('selectend', this.onSelectEnd);
       this.controller1.addEventListener('squeezestart', this.onSqueezeStart);
       this.controller1.addEventListener('squeezeend', this.onSqueezeEnd);
-      this.tScene.add(this.controller1);
+      // this.tScene.add(this.controller1);
+      rig.add(this.controller1);
 
       this.controller2 = renderer.xr.getController(1);
       this.controller2.addEventListener('connected', this.onConnected);
@@ -219,7 +221,8 @@ AFRAME.registerComponent("handy-component", {
       this.controller2.addEventListener('selectend', this.onSelectEnd);
       this.controller2.addEventListener('squeezestart', this.onSqueezeStart);
       this.controller2.addEventListener('squeezeend', this.onSqueezeEnd);
-      this.tScene.add(this.controller2);
+      // this.tScene.add(this.controller2);
+      rig.add(this.controller2);
 
       const controllerModelFactory = new XRControllerModelFactory();
       const handModelFactory = new XRHandModelFactory();
@@ -228,24 +231,28 @@ AFRAME.registerComponent("handy-component", {
       // Hand 1
       controllerGrip1 = renderer.xr.getControllerGrip(0);
       controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
-      this.tScene.add(controllerGrip1);
+      // this.tScene.add(controllerGrip1);
+      rig.add(controllerGrip1);
 
       this.handR = renderer.xr.getHand(1);
       this.handR.addEventListener('pinchstart', this.onPinchStart);
       this.handR.addEventListener('pinchend', this.onPinchEnd);
       this.handR.add(handModelFactory.createHandModel(this.handR, 'mesh'));
-      this.tScene.add(this.handR);
+      // this.tScene.add(this.handR);
+      rig.add(this.handR);
 
       // Hand 2
       controllerGrip2 = renderer.xr.getControllerGrip(1);
       controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
-      this.tScene.add(controllerGrip2);
+      // this.tScene.add(controllerGrip2);
+      rig.add(controllerGrip2);
 
       this.handL = renderer.xr.getHand(0);
       this.handL.addEventListener('pinchstart', this.onPinchStart);
       this.handL.addEventListener('pinchend', this.onPinchEnd);
       this.handL.add(handModelFactory.createHandModel(this.handL, 'mesh'));
-      this.tScene.add(this.handL);
+      // this.tScene.add(this.handL);
+      rig.add(this.handL);
 
       this.hands.push(this.handR, this.handL);
 
@@ -487,11 +494,17 @@ AFRAME.registerComponent("handy-component", {
           helpObjBox.scale.setScalar(0.3);
           helpObjBox.position.copy(uiPanel.object3D.getWorldPosition(new THREE.Vector3()));
           helpObjBox.rotation.copy(uiPanel.object3D.rotation);
-          helpObjBox.rotateX(- Math.PI / 2);
+          // helpObjBox.rotateX(- Math.PI / 2);
 
           // TODO now it is ok to use Z-direction, but later it can be need to use Y
           const adjustVector = helpObjBox.getWorldDirection(new THREE.Vector3());
+          const axis = new THREE.Vector3(1, 0, 0);
+          const matrix = new THREE.Matrix4().makeRotationAxis(axis, - Math.PI / 2); // Rotate by 90 degrees
+          adjustVector.applyMatrix4(matrix);
           adjustVector.multiplyScalar(0.4);
+
+
+
           helpObjBox.position.add(adjustVector);
         } 
       }
@@ -730,6 +743,7 @@ AFRAME.registerComponent("handy-component", {
       if (object.el.id != 'help_obj_box') {
         handWrist.attach(object);
       } else {
+        // TODO fix this, now it is not work
         // two pinches at the same time for help box scaling
         if (this.handL.userData.selected == object 
             && this.handR.userData.selected == object) {
@@ -791,7 +805,7 @@ AFRAME.registerComponent("handy-component", {
 
         // console.log('bb: ' + helpBoxMesh.geometry.boundingBox);
         // this.drawLine([helpBoxMesh.geometry.boundingBox.min, helpBoxMesh.geometry.boundingBox.max], 'yellow');
-        if (this.checkBoundedBoxCollision(helpBoxMesh, indexTip)) {
+        if (this.checkBoundedBoxCollision(helpBoxMesh, indexTip.getWorldPosition(this.tmpVector1))) {
           return movable;
         } else {
           continue;
@@ -850,7 +864,7 @@ AFRAME.registerComponent("handy-component", {
     points.forEach((p) => {
       p.sub(startPoint);
     });
-    let checkPoint = indexTip.position.clone();
+    let checkPoint = indexTip.clone();
     checkPoint.sub(startPoint);
 
     // aligning the vector of points 6 - 5 with X axis
@@ -880,6 +894,8 @@ AFRAME.registerComponent("handy-component", {
     });
     checkPoint.applyMatrix4(alignMatrix);
 
+
+    // this.drawLine([checkPoint, points[5]], 'yellow');
     // this.drawLine([points[6], points[5]], 'green');
     // this.drawLine([points[6], points[7]], 'blue');
     // this.drawLine([points[6], points[2]], 'red');
@@ -977,20 +993,25 @@ AFRAME.registerComponent("handy-component", {
     let lhel = document.getElementById('left-hand');
     this.controller2.add(lhel.object3D);
 
-    let rayCasterCfg = rhel.getAttribute('raycaster');
+    let rayCasterRCfg = rhel.getAttribute('raycaster');
+    let rayCasterLCfg = lhel.getAttribute('raycaster');
     if (this.isControlleraHand) {
-      // rayCasterCfg['lineColor'] = 'green';
-      // rayCasterCfg['far'] = 0.1;
-      rayCasterCfg['enabled'] = false; // TODO check if it works
-      rayCasterCfg['showLine'] = false;
+      rayCasterRCfg['enabled'] = false; // TODO check if it works
+      rayCasterRCfg['showLine'] = false;
+      rayCasterLCfg['enabled'] = false; // TODO check if it works
+      rayCasterLCfg['showLine'] = false;
     } else {
-      rayCasterCfg['lineColor'] = 'blue';
-      rayCasterCfg['far'] = 10;
-      rayCasterCfg['enabled'] = true;
-      rayCasterCfg['showLine'] = true;
+      rayCasterRCfg['lineColor'] = 'blue';
+      rayCasterRCfg['far'] = 10;
+      rayCasterRCfg['enabled'] = true;
+      rayCasterRCfg['showLine'] = true;
+      rayCasterLCfg['lineColor'] = 'blue';
+      rayCasterLCfg['far'] = 10;
+      rayCasterLCfg['enabled'] = true;
+      rayCasterLCfg['showLine'] = true;
     }
-    rhel.setAttribute('raycaster', rayCasterCfg);
-    lhel.setAttribute('raycaster', rayCasterCfg);
+    rhel.setAttribute('raycaster', rayCasterRCfg);
+    lhel.setAttribute('raycaster', rayCasterLCfg);
 
   },
   onSelectStart(event) {
@@ -1118,7 +1139,8 @@ AFRAME.registerComponent("handy-component", {
         let dtL = this.handL.joints['middle-finger-tip'].position
           .distanceTo(this.handL.joints['thumb-tip'].position);
 
-        let middlePinchTreshold = 0.02;
+        let middlePinchTreshold = 0.015;
+        // let middlePinchTreshold = 0.05; // for testing
 
 
         if (dtR < middlePinchTreshold) {
@@ -1147,24 +1169,16 @@ AFRAME.registerComponent("handy-component", {
   },
   repositionUiPanel(fingerPos) {
     // TODO left eye problem
-    const head = document.getElementById('head');
+    const rig = document.getElementById('rig');
     const uiPanel = document.getElementById('ui-panel');
 
-
-    // getWorldPosition(new THREE.Vector3())
-    // const camPos = head.object3D.position.add(head.parentEl.object3D.position);
-    // const camPos = head.object3D.getWorldPosition(this.tmpVector2);
-    // TODO choose the right variant
     const camPos = this.el.sceneEl.renderer.xr.getCamera().getWorldPosition(new THREE.Vector3());
+    const worldFingerPos = fingerPos.add(rig.object3D.position);
+    const additionalDistance = new THREE.Vector3().copy(worldFingerPos);
+    additionalDistance.sub(camPos).normalize().multiplyScalar(0.15);
 
-
-    const newPosition = fingerPos.sub(camPos);
-    const additionalDistance = new THREE.Vector3();
-    additionalDistance.copy(newPosition).normalize().multiplyScalar(0.15);
-    newPosition.add(camPos).add(additionalDistance);
-    uiPanel.object3D.position.copy(newPosition);
+    uiPanel.object3D.position.copy(worldFingerPos.add(additionalDistance));
     uiPanel.object3D.lookAt(camPos);
-
   },
   clickByTip(indexTip) {
     // calculating x,y coordinates of the point of ui-panel touching in percentage
