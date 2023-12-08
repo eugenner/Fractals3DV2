@@ -140,8 +140,34 @@ AFRAME.registerComponent("handy-component", {
 
     });
 
+    document.getElementById("help_model").addEventListener('model-error', (evt) => { 
+      console.log('model-error help_model');
+    });
+    // TODO testing
 
+
+    // self.emit('progress', {
+    //   loadedBytes: xhr.loaded,
+    //   totalBytes: xhr.total,
+    //   xhr: xhr
+    // });
+    document.getElementById("help_model").addEventListener('progress', (evt) => {
+      console.log('model-loaded progress');
+    });
+
+    document.getElementById("help_model").addEventListener('loaded', (evt) => {
+      console.log('model-loaded help_model');
+
+      // https://glitch.com/edit/#!/aframe-assetsloaded?path=index.html%3A20%3A111
+    });
+
+
+    document.getElementById("help_obj").addEventListener('model-error', (evt) => { 
+      console.log('model-error');
+    });
+    // TODO testing
     document.getElementById("help_obj").addEventListener('model-loaded', (evt) => {
+      console.log('model-loaded');
       const aabb = new THREE.Box3().setFromObject(evt.target.object3D);
       const aabbSize = aabb.getSize(new THREE.Vector3());
       const helpObjBox = document.createElement('a-entity');
@@ -172,8 +198,13 @@ AFRAME.registerComponent("handy-component", {
       this.el.appendChild(helpObjBox);
     });
 
+
     // The main Scene is loaded
     this.el.sceneEl.addEventListener('loaded', (sceneEvt) => {
+      console.log('scene-loaded');
+
+
+
       const rig = document.getElementById('rig').object3D;
       this.tScene = this.el.sceneEl.object3D;
       this.uiPanel = document.getElementById('ui-panel');

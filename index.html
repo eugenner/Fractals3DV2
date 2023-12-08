@@ -1,196 +1,206 @@
-<html>
-
-  <head>
-    <title>Fractals 3D</title>
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4d0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/logo192.png">
+    <title>F3D</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./node_modules/three/build/three.module.js"
+        }
+      }
+    </script>
+    <!-- <script type="module" src="node_modules/three/build/three.module.js"></script> -->
     <script src="node_modules/aframe/dist/aframe-v1.4.2.js"></script>
 
-    <!-- <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@ac0415de507bbad20caf5888e0230a9725cb8eef/dist/aframe-master.min.js"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.js"></script> -->
+    <script src="js/index.js"></script>
     <script type="module" src="handy-component.js"></script>
     <script type="module" src="html-component.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.1.0/dist/aframe-extras.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
 
-
     <style>
-            #dom-overlay {
-                display: initial;
-            }
-            #dom-overlay:xr-overlay {
-                display: initial;
-            }
+        #dom-overlay {
+            display: initial;
+        }
+        #dom-overlay:xr-overlay {
+            display: initial;
+        }
 
 
-            a-scene {
-              height: 95vh;
-            }
+        a-scene {
+          height: 95vh;
+        }
 
-            body {
-              font-size: 16px;
-            }
+        body {
+          font-size: 16px;
+        }
 
-            * {
-              box-sizing: border-box;
-            }
+        * {
+          box-sizing: border-box;
+        }
 
-            #dom-overlay {
-              font-family: Sans-Serif;
-              color: white;
-            }
+        #dom-overlay {
+          font-family: Sans-Serif;
+          color: white;
+        }
 
-            .container {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            }
+        .container {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
 
-            .exit-xr {
-              flex: 1;
-              text-align: center;
-            }
+        .exit-xr {
+          flex: 1;
+          text-align: center;
+        }
 
-            .help {
-              flex: 0;
-              border-radius: 1em;
-              /* Add any styles for the "help" div as needed */
-            }
+        .help {
+          flex: 0;
+          border-radius: 1em;
+          /* Add any styles for the "help" div as needed */
+        }
 
 </style>
 
-  </head>
-
-  <body>
+</head>
+<body>
     <a-scene handy-component shadow="type: pcfsoft"
-      webxr="optionalFeatures:hand-tracking,dom-overlay;overlayElement:#dom-overlay;"
-      render-order="background, menu, menubutton, menutext, foreground, hud"
-      >
-      <a-assets>
-        <a-sphere id="branch_" ind material="color: green; emissive: green; emissiveIntensity: 5" radius="0.025" class="branch clickable"><a-sphere id="branch_perp_" ind color="red" radius="0.0125" class="branch_perp clickable" position="0.25 -0.5 0"></a-sphere></a-sphere>
-        <a-asset-item id="help_model" src="./help.glb"></a-asset-item>
-        <audio id="simple-piano-melody" src="simple-piano-melody-9834.mp3" preload="auto"></audio>
-      </a-assets>
+    webxr="optionalFeatures:hand-tracking,dom-overlay;overlayElement:#dom-overlay;"
+    render-order="background, menu, menubutton, menutext, foreground, hud"
+    >
+    <a-assets>
+      <a-sphere id="branch_" ind material="color: green; emissive: green; emissiveIntensity: 5" radius="0.025" class="branch clickable"><a-sphere id="branch_perp_" ind color="red" radius="0.0125" class="branch_perp clickable" position="0.25 -0.5 0"></a-sphere></a-sphere>
+      <a-asset-item id="help_model" src="./help.glb"></a-asset-item>
+      <audio id="simple-piano-melody" src="simple-piano-melody-9834.mp3" preload="auto"></audio>
+    </a-assets>
 
-      <a-entity id="melody" sound="src: #simple-piano-melody; loop: true; autoplay: false;"></a-entity>
+    <a-entity id="melody" sound="src: #simple-piano-melody; loop: true; autoplay: false;"></a-entity>
 
-      <a-gltf-model id="help_obj" src="#help_model" position="0 0 0" rotation="0 0 0" scale="0.5 0.5 0.5" visible="false"></a-gltf-model>
-  
-      <a-sphere color="red" radius="0.01" id="cursor" material="shader:flat"></a-sphere>
+    <a-sphere color="red" radius="0.01" id="cursor" material="shader:flat"></a-sphere>
 
-      <a-entity id="rig" position="0 0 0" rotation="0 0 0">
-        <a-entity id="head"
-          camera="near: 0.01;"
-          wasd-controls="acceleration: 50"
-          look-controls="pointerLockEnabled: false"
-          position="0 1.65 0"
-          sound="src: url(click.mp3); poolSize: 10;">
-        </a-entity>
-        <a-entity id="left-hand" cursor
-          raycaster="showLine: true; far: 10; lineColor: red; objects: [html],.movable; interval:100;">
-        </a-entity>
-        <a-entity id="right-hand" cursor
-          raycaster="showLine: true; far: 10; lineColor: red; objects: [html],.movable; interval:100;">
-        </a-entity>
-
+    <a-entity id="rig" position="0 0 0" rotation="0 0 0">
+      <a-entity id="head"
+        camera="near: 0.01;"
+        wasd-controls="acceleration: 50"
+        look-controls="pointerLockEnabled: false"
+        position="0 1.65 0"
+        sound="src: url(click.mp3); poolSize: 10;">
+      </a-entity>
+      <a-entity id="left-hand" cursor
+        raycaster="showLine: true; far: 10; lineColor: red; objects: [html],.movable; interval:100;">
+      </a-entity>
+      <a-entity id="right-hand" cursor
+        raycaster="showLine: true; far: 10; lineColor: red; objects: [html],.movable; interval:100;">
       </a-entity>
 
-      <a-sphere id="ball1" class="movable" color="green" radius="0.125"
-        position="0 0.8 -1.5">
-      </a-sphere>
-      <a-sphere id="ball2" class="movable" color="blue" radius="0.25"
-        position="-0.5 0.8 -0.5" visible="true"
-        material="color: blue; opacity: 0.5;"></a-sphere>
+    </a-entity>
+
+    <a-sphere id="ball1" class="movable" color="green" radius="0.125"
+      position="0 0.8 -1.5">
+    </a-sphere>
+    <a-sphere id="ball2" class="movable" color="blue" radius="0.25"
+      position="-0.5 0.8 -0.5" visible="true"
+      material="color: blue; opacity: 0.5;"></a-sphere>
 
 
-      <a-sphere id="scaled_tree" class="movable"  radius="0.025" position="0 0.25 0" material="color: yellow; opacity: 0.5;"></a-sphere>
+    <a-sphere id="scaled_tree" class="movable"  radius="0.025" position="0 0.25 0" material="color: yellow; opacity: 0.5;"></a-sphere>
 
-      <a-entity id="ui-panel" class="movable"
-        html="cursor:#cursor;html:#my-interface"
-        position="0.7 1 -1" material="opacity: 0.5;">
-      </a-entity>
+    <a-entity id="ui-panel" class="movable"
+      html="cursor:#cursor;html:#my-interface"
+      position="0.7 1 -1" material="opacity: 0.5;">
+    </a-entity>
 
-      <a-light id="dirlight" intensity="1"
-        light="castShadow:false;type:directional" position="40 80 10"></a-light>
-      <a-light type="hemisphere" ground-color="white" color="white" intensity="0"></a-light>
-      <!-- <a-circle hide-on-enter-ar shadow="cast:false" class="navmesh" rotation="-90 0 0" radius="6"
-        material="shader:phong;color:white;"></a-circle> -->
-      <!-- <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0" environment="lighting:none;preset:yavapai;skyType:atmosphere;"></a-entity> -->
-      <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0" environment="lighting:none; preset:yavapai; skyType:atmosphere; 
-        groundColor:white; groundColor2: #afd5fd; dressingColor: #f8bcfb;"></a-entity>
+    <a-light id="dirlight" intensity="1"
+      light="castShadow:false;type:directional" position="40 80 10"></a-light>
+    <a-light type="hemisphere" ground-color="white" color="white" intensity="0"></a-light>
+    <!-- <a-circle hide-on-enter-ar shadow="cast:false" class="navmesh" rotation="-90 0 0" radius="6"
+      material="shader:phong;color:white;"></a-circle> -->
+    <!-- <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0" environment="lighting:none;preset:yavapai;skyType:atmosphere;"></a-entity> -->
+    <a-entity id="environment" hide-on-enter-ar position="0 -0.2 0" environment="lighting:none; preset:yavapai; skyType:atmosphere; 
+      groundColor:white; groundColor2: #afd5fd; dressingColor: #f8bcfb;"></a-entity>
+    
+    <a-entity id="help_obj" gltf-model="#help_model" class="model" position="0 0 0" rotation="0 0 0" scale="0.5 0.5 0.5" visible="false"></a-entity>
 
-    </a-scene>
+  </a-scene>
 
-    <div id="dom-overlay" class="a-dom-overlay">
-      <header style="pointer-events: none; user-select: none;">
-        <h1>
-          Fractals 3D
-        </h1>
-        <div style="color: black">
-          <p>Hints:</p>
-          <ul>
-            <li>Add a New Branch (or press Random). More branches more time for
-              generation, be careful.</li>
-            <li>Try to move the vertices of the triangles.</li>
-            <li>Press Generate for Tree generation.</li>
-          </ul>
-        </div>
-      </header>
-      <section
-        style="display: inline-block; background: lavenderblush; color: #333333; border-radius: 1em; padding: 1em; margin:0; accent-color: hotpink;"
-        id="my-interface">
-        <fieldset style="border-radius: 1em; margin-bottom: 5px;">
-          <legend>Branches</legend>
-          <button id="addBranch" style="margin-right: 5px;">Add New</button>
-          <button id="removeBranch" style="margin-right: 5px;">Remove Last</button>
-          <button id="removeAllBranches">Clear All</button>
-        </fieldset>
-        <fieldset style="border-radius: 1em; margin-bottom: 5px;">
-          <legend>Tree</legend>
-          <button id="generateTree" style="margin-right: 5px;">Generate</button>
-          <button id="addRandomTree" style="margin-right: 5px;">Random (preset)</button>
-          <button id="clearTree" style="margin-right: 5px;">Clear</button>
-        </fieldset>
-        <fieldset style="border:0 none;border-top: 1px solid grey;">
-          <legend>Settings</legend>
-          <div style="display: flex; align-items: center;">
-            <label>Iterations:</label>
-            <label id="iterationsVal" style="margin-left: 5px;">4</label>
-            <input type="range" id="rangeIterations" min="2" max="8" step="1" value="4" style="margin-left: 15px;"/>
-          </div>
-          <div style="display: flex; align-items: center; padding-top: 5px;">
-            <label>Light: </label>
-            <input name="switchLight" type="radio" id="light-day"
-              name="light" value="day" checked>
-            <label>Day</label>
-            <input name="switchLight" type="radio" id="light-night"
-              name="light" value="night">
-            <label>Night</label>
-          </div>
-          <div style="padding-top: 5px;">
-            <label>Music: </label>
-            <input name="switchMusic" type="radio" id="music-on"
-              name="music" value="on">
-            <label>On</label>
-            <input name="switchMusic" type="radio" id="music-off"
-              name="music" value="off" checked>
-            <label>Off</label>
-          </div>
-        </fieldset>
-        
-        <hr>
+  <div id="dom-overlay" class="a-dom-overlay">
+    <header style="pointer-events: none; user-select: none;">
+      <h1>
+        Fractals 3D
+      </h1>
+      <div style="color: black">
+        <p>Hints:</p>
+        <ul>
+          <li>Add a New Branch (or press Random). More branches more time for
+            generation, be careful.</li>
+          <li>Try to move the vertices of the triangles.</li>
+          <li>Press Generate for Tree generation.</li>
+        </ul>
+      </div>
+    </header>
+    <section
+      style="display: inline-block; background: lavenderblush; color: #333333; border-radius: 1em; padding: 1em; margin:0; accent-color: hotpink;"
+      id="my-interface">
+      <fieldset style="border-radius: 1em; margin-bottom: 5px;">
+        <legend>Branches</legend>
+        <button id="addBranch" style="margin-right: 5px;">Add New</button>
+        <button id="removeBranch" style="margin-right: 5px;">Remove Last</button>
+        <button id="removeAllBranches">Clear All</button>
+      </fieldset>
+      <fieldset style="border-radius: 1em; margin-bottom: 5px;">
+        <legend>Tree</legend>
+        <button id="generateTree" style="margin-right: 5px;">Generate</button>
+        <button id="addRandomTree" style="margin-right: 5px;">Random (preset)</button>
+        <button id="clearTree" style="margin-right: 5px;">Clear</button>
+      </fieldset>
+      <fieldset style="border:0 none;border-top: 1px solid grey;">
+        <legend>Settings</legend>
         <div style="display: flex; align-items: center;">
-          <div style="flex: 0; text-align: left;">Status:</div>
-          <div id="statusText" style="flex: 1; text-align: center; margin-right: 3em; font-size: smaller;">Ready</div>
+          <label>Iterations:</label>
+          <label id="iterationsVal" style="margin-left: 5px;">4</label>
+          <input type="range" id="rangeIterations" min="2" max="8" step="1" value="4" style="margin-left: 15px;"/>
         </div>
-        <hr>
-
-        <div class="container">
-          <div id="exitXR" class="exit-xr"><button style="border-radius: 1em;">Exit Immersive</button></div>
-          <button id="help" class="help">?</button>
+        <div style="display: flex; align-items: center; padding-top: 5px;">
+          <label>Light: </label>
+          <input name="switchLight" type="radio" id="light-day"
+            name="light" value="day" checked>
+          <label>Day</label>
+          <input name="switchLight" type="radio" id="light-night"
+            name="light" value="night">
+          <label>Night</label>
         </div>
-
-      </section>
+        <div style="padding-top: 5px;">
+          <label>Music: </label>
+          <input name="switchMusic" type="radio" id="music-on"
+            name="music" value="on">
+          <label>On</label>
+          <input name="switchMusic" type="radio" id="music-off"
+            name="music" value="off" checked>
+          <label>Off</label>
+        </div>
+      </fieldset>
       
-    </div>
-  </body>
+      <hr>
+      <div style="display: flex; align-items: center;">
+        <div style="flex: 0; text-align: left;">Status:</div>
+        <div id="statusText" style="flex: 1; text-align: center; margin-right: 3em; font-size: smaller;">Ready</div>
+      </div>
+      <hr>
+
+      <div class="container">
+        <div id="exitXR" class="exit-xr"><button style="border-radius: 1em;">Exit Immersive</button></div>
+        <button id="help" class="help">?</button>
+      </div>
+
+    </section>
+    
+  </div>
+
+</body>
 </html>

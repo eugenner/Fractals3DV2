@@ -1,0 +1,22 @@
+{
+    "name":"Fractals 3D",
+    "short_name":"F3D",
+    "description":"Fractals 3D Editor and Viewer",
+    "start_url":".",
+    "background_color": "#fff",
+    "theme_color":"#4d0",
+    "display":"standalone",
+    "icons":[
+        {
+            "src":"images/logo192.png",
+            "sizes":"192x192",
+            "type":"image/png",
+            "purpose":"any maskable"
+        },
+        {
+            "src":"images/logo512.png",
+            "sizes":"512x512",
+            "type":"image/png"
+        }
+    ]
+}
