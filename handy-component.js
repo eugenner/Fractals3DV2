@@ -183,7 +183,8 @@ AFRAME.registerComponent("handy-component", {
       });
       helpObjBox.setAttribute('material', {
         color: 'white',
-        opacity: 0.1
+        opacity: 0.05,
+        shader: 'phong'
       });
 
       helpObjBox.classList.add('movable');
