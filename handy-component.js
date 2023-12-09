@@ -170,6 +170,8 @@ AFRAME.registerComponent("handy-component", {
       console.log('model-loaded');
       const aabb = new THREE.Box3().setFromObject(evt.target.object3D);
       const aabbSize = aabb.getSize(new THREE.Vector3());
+      
+      // Creating a box around the Help Model
       const helpObjBox = document.createElement('a-entity');
       helpObjBox.setAttribute('id', 'help_obj_box');
       helpObjBox.setAttribute('visible', false);
@@ -518,24 +520,18 @@ AFRAME.registerComponent("handy-component", {
         const helpObj = document.getElementById("help_obj").object3D;
         const helpObjBox = document.getElementById("help_obj_box").object3D;
         helpObj.visible = !helpObj.visible;
-        helpObjBox.visible = !helpObjBox.visible;
+        helpObjBox.visible = helpObj.visible;
         if(helpObj.visible) {
+          
           // position Help 3d model above ui-panel
           const uiPanel = document.getElementById('ui-panel');
           helpObjBox.scale.setScalar(0.3);
           helpObjBox.position.copy(uiPanel.object3D.getWorldPosition(new THREE.Vector3()));
-          helpObjBox.rotation.copy(uiPanel.object3D.rotation);
-          // helpObjBox.rotateX(- Math.PI / 2);
-
-          // TODO now it is ok to use Z-direction, but later it can be need to use Y
-          const adjustVector = helpObjBox.getWorldDirection(new THREE.Vector3());
-          const axis = new THREE.Vector3(1, 0, 0);
-          const matrix = new THREE.Matrix4().makeRotationAxis(axis, - Math.PI / 2); // Rotate by 90 degrees
-          adjustVector.applyMatrix4(matrix);
-          adjustVector.multiplyScalar(0.4);
-
-
-
+          helpObjBox.quaternion.copy(uiPanel.object3D.getWorldQuaternion(new THREE.Quaternion()));
+          
+          // adjust 0.35 to up
+          const adjustVector = new THREE.Vector3(0,0.35,0);
+          adjustVector.applyQuaternion(helpObjBox.quaternion);
           helpObjBox.position.add(adjustVector);
         } 
       }
