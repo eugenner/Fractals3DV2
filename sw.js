@@ -24,19 +24,23 @@ self.addEventListener("install", e => {
                     './node_modules/aframe/dist/aframe-v1.4.2.js',
                     './node_modules/three/build/three.module.js',
                     './node_modules/super-three/build/three.js',
-                    './node_modules/super-three/examples/jsm/webxr/XRControllerModelFactory.js?v=f50dc469',
-                    './node_modules/super-three/examples/jsm/webxr/XRHandModelFactory.js?v=f50dc469',
                     './node_modules/super-three/examples/jsm/loaders/GLTFLoader.js',
                     './node_modules/super-three/examples/jsm/libs/motion-controllers.module.js',
-                    './node_modules/super-three/examples/jsm/webxr/XRHandPrimitiveModel.js',
+                    './node_modules/super-three/examples/jsm/webxr/XRControllerModelFactory.js?v=f50dc469',
+                    './node_modules/super-three/examples/jsm/webxr/XRHandModelFactory.js?v=f50dc469',
+                    './node_modules/super-three/examples/jsm/webxr/XRHandPrimitiveModel.js?v=f50dc469',
                     './node_modules/super-three/examples/jsm/webxr/XRHandMeshModel.js',
+
                     'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/profilesList.json',
                     'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/generic-hand/left.glb',
                     'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/generic-hand/right.glb',
                     'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/generic-hand/profile.json',
+                    'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/meta-quest-touch-plus/profile.json',
                     'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/oculus-touch-v3/profile.json',
                     'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/oculus-touch-v3/right.glb',
-                    'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/oculus-touch-v3/left.glb'
+                    'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/oculus-touch-v3/left.glb',
+                    'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/meta-quest-touch-plus/right.glb',
+                    'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/meta-quest-touch-plus/left.glb'
     
                 
             ];
