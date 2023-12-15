@@ -384,8 +384,9 @@ AFRAME.registerComponent("handy-component", {
           segments.push(segment);
           threeScene.add(segment);
 
-          // TODO improve this
           let scaledSegment = new THREE.LineSegments(scaledLg, lm);
+          // Prevent rasycast checking for lines
+          scaledSegment.raycast = function () {};
           scaledSegments.push(scaledSegment);
           scaledTreeRoot.object3D.add(scaledSegment);
         })
