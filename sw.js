@@ -61,6 +61,12 @@ self.addEventListener("install", e => {
 
 self.addEventListener("fetch", e => {
     console.log(`Intercepting fetch ${e.request.url}`);
+    let currentUrl = new URL(self.registration.scope);
+    // in case of developing mode
+    if(currentUrl.port == 5173) {
+        return fetch(e.request);
+    }
+
     e.respondWith( 
         caches.match(e.request).then( response => {
             return response || fetch(e.request);
