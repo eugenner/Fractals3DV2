@@ -939,6 +939,9 @@ AFRAME.registerComponent("handy-component", {
 
   // Check if tip of index finger is close to the ui panel.
   calculateUiBoundBox(movable, indexTip) {
+    if(!indexTip) {
+      return false;
+    }
     const panelMesh = movable.children.filter(c => c.type == 'Mesh')[0];
     let h = panelMesh.geometry.parameters.height;
     let w = panelMesh.geometry.parameters.width;
