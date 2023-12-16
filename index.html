@@ -76,11 +76,11 @@
     >
     <a-assets>
       <a-sphere id="branch_" ind material="color: green; emissive: green; emissiveIntensity: 5" radius="0.025" class="branch clickable"><a-sphere id="branch_perp_" ind color="red" radius="0.0125" class="branch_perp clickable" position="0.25 -0.5 0"></a-sphere></a-sphere>
-      <a-asset-item id="help_model" src="./help.glb"></a-asset-item>
+      <a-asset-item id="help_model" src="./help2.glb"></a-asset-item>
       <audio id="simple-piano-melody" src="simple-piano-melody-9834.mp3" preload="auto"></audio>
     </a-assets>
 
-    <a-entity id="melody" sound="src: #simple-piano-melody; loop: true; autoplay: false;"></a-entity>
+    <a-entity id="melody" sound="src: #simple-piano-melody; loop: true; autoplay: false;" position="0 2 0"></a-entity>
 
     <a-sphere color="red" radius="0.01" id="cursor" material="shader:flat"></a-sphere>
 
