@@ -1,5 +1,5 @@
 import { XRControllerModelFactory } from './node_modules/super-three/examples/jsm/webxr/XRControllerModelFactory.js';
-import { XRHandModelFactory } from './node_modules/super-three/examples/jsm/webxr/XRHandModelFactory.js';
+import { XRHandModelFactory } from './XRHandModelFactory.js';
 
 import { RandomTreeData } from './random-tree.js';
 
@@ -260,7 +260,7 @@ AFRAME.registerComponent("handy-component", {
 
       const controllerModelFactory = new XRControllerModelFactory();
       const handModelFactory = new XRHandModelFactory();
-      // handModelFactory.setPath('./assets/');
+      handModelFactory.setPath('./generic-hand/');
 
       // Hand 1
       controllerGrip1 = renderer.xr.getControllerGrip(0);
@@ -1033,11 +1033,11 @@ AFRAME.registerComponent("handy-component", {
       rayCasterLCfg['enabled'] = false; // TODO check if it works
       rayCasterLCfg['showLine'] = false;
     } else {
-      rayCasterRCfg['lineColor'] = 'blue';
+      rayCasterRCfg['lineColor'] = 'white';
       rayCasterRCfg['far'] = 10;
       rayCasterRCfg['enabled'] = true;
       rayCasterRCfg['showLine'] = true;
-      rayCasterLCfg['lineColor'] = 'blue';
+      rayCasterLCfg['lineColor'] = 'white';
       rayCasterLCfg['far'] = 10;
       rayCasterLCfg['enabled'] = true;
       rayCasterLCfg['showLine'] = true;
