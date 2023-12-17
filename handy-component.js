@@ -1166,23 +1166,33 @@ AFRAME.registerComponent("handy-component", {
 
         // middle finger pinch detected
         // move ui-panel to the hand place
-        let dtR = this.handR.joints['middle-finger-tip'].position
-          .distanceTo(this.handR.joints['thumb-tip'].position);
-        let dtL = this.handL.joints['middle-finger-tip'].position
-          .distanceTo(this.handL.joints['thumb-tip'].position);
+        let rmt = this.handR.joints['middle-finger-tip'];
+        let rtt = this.handR.joints['thumb-tip'];
+        let lmt = this.handL.joints['middle-finger-tip'];
+        let ltt = this.handL.joints['thumb-tip'];
+
+        let dtR = 100;
+        let dtL = 100;
+
+        if(rmt && rtt) {
+          dtR = rmt.position.distanceTo(rtt.position);
+        }
+        if(lmt && ltt) {
+          dtL = lmt.position.distanceTo(ltt.position);
+        }
 
         let middlePinchTreshold = 0.015;
         // let middlePinchTreshold = 0.05; // for testing
 
 
-        if (dtR < middlePinchTreshold) {
+        if (rmt && dtR < middlePinchTreshold) {
           // right middle pinch detected
-          this.repositionUiPanel(this.handR.joints['middle-finger-tip'].position.clone());
+          this.repositionUiPanel(rmt.position.clone());
         }
 
-        if (dtL < middlePinchTreshold) {
+        if (lmt && dtL < middlePinchTreshold) {
           // left middle pinch detected
-          this.repositionUiPanel(this.handL.joints['middle-finger-tip'].position.clone());
+          this.repositionUiPanel(lmt.position.clone());
         }
       }
 
