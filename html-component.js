@@ -9,13 +9,6 @@ const schemaHTML = {
 	}
 };
 
-documentation:
-{
-	schemaHTML.html.description = `HTML element to use.`;
-	schemaHTML.cursor.description = `Visual indicator for where the user is currently pointing`;
-}
-
-
 const _pointer = new THREE.Vector2();
 const _event = { type: '', data: _pointer };
 AFRAME.registerComponent('html', {
