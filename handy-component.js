@@ -809,7 +809,6 @@ AFRAME.registerComponent("handy-component", {
 
     }
 
-
   },
   collideObject(indexTip) {
     for (let sphereInd in this.movables) {
@@ -942,59 +941,22 @@ AFRAME.registerComponent("handy-component", {
     if(!indexTip) {
       return false;
     }
-    const panelMesh = movable.children.filter(c => c.type == 'Mesh')[0];
+    const panelMesh = movable.children[0];
     let h = panelMesh.geometry.parameters.height;
     let w = panelMesh.geometry.parameters.width;
-    let d = 0.01; // depth
-    let diag = Math.sqrt(Math.pow(h, 2) + Math.pow(w, 2) + Math.pow(d, 2)) + 0.03;
-    const points = Array(8).fill(null).map(() => { return new THREE.Vector3(0, 0, 0).clone() });
-    let v1 = new THREE.Vector3(0, 0, 0);
-    let v2 = new THREE.Vector3(0, 0, 0);
-    const perpendicularVector = new THREE.Vector3();
-
-    points[0].add(new THREE.Vector3(0, h / 2, 0))
-      .add(new THREE.Vector3(w / 2, 0, 0));
-    points[1].add(new THREE.Vector3(0, - h / 2, 0))
-      .add(new THREE.Vector3(w / 2, 0, 0));
-    points[2].add(new THREE.Vector3(0, - h / 2, 0))
-      .add(new THREE.Vector3(- w / 2, 0, 0));
-    points[3].add(new THREE.Vector3(0, h / 2, 0))
-      .add(new THREE.Vector3(- w / 2, 0, 0));
-
-
-    for (let i = 0; i < 4; i++) {
-      points[i].applyQuaternion(movable.quaternion);
-    }
-
-
-    v1.copy(points[0]);
-    v2.copy(points[1]);
-
-    const perp = perpendicularVector.crossVectors(v1, v2).normalize().multiplyScalar(d);
-
-    // TODO
-    // this.drawLine([movable.position, perp.clone().multiplyScalar(10).add(movable.position)], 'blue');
-
-    for (let i = 4; i < 8; i++) {
-      points[i].add(points[i - 4]).add(perp);
-    }
+    let d = 0.04; // depth
 
     let tipPos = indexTip.getWorldPosition(this.tmpVector1);
     tipPos.sub(movable.position);
-    points.forEach(point => {
-      point.distance = tipPos.distanceTo(point);
-    });
-    let minDist = points.reduce((min, current) =>
-      (current.distance < min ? current.distance : min), points[0].distance);
-    let maxDist = points.reduce((max, current) =>
-      (current.distance > max ? current.distance : max), points[0].distance);
-    let sumD = minDist + maxDist;
+    tipPos.applyQuaternion(movable.quaternion.clone().invert());
 
-    // The idea that next condition will work:
-    // parallepiped diagonal nearly equal sum of one shortest and one longest distancies 
-    // from tip of finger to all 8 points
+    tipPos.x += w / 2;
+    tipPos.y += h / 2;
+    tipPos.z += d / 2;
 
-    return (sumD < diag);
+    let condition = tipPos.x > 0 && tipPos.y > 0 && tipPos.z > 0
+      && tipPos.x < w && tipPos.y < h && tipPos.z < d;
+    return condition;
   },
   onPinchEnd(event) {
     if (event.handedness == 'right') {
