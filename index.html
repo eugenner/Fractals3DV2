@@ -7,6 +7,8 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="images/logo192.png">
     <title>F3D</title>
+
+    
     <script type="importmap">
       {
         "imports": {
@@ -14,10 +16,35 @@
         }
       }
     </script>
-    <!-- <script type="module" src="node_modules/three/build/three.module.js"></script> -->
+
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+          .then(registration => {
+            const worker = registration.installing || registration.waiting || registration.active;
+            if (worker) {
+              navigator.serviceWorker.addEventListener('message', event => {
+                let pr = parseInt(event.data.progress);
+                const clpEl = document.getElementById('cache_loading_progress')
+                if(clpEl) {
+                  clpEl.textContent = `Cache Loading Progress: ${pr}%`;
+                  if(pr > 1 && pr < 100) {
+                    document.getElementById('cache_loading_progress').style.display = 'block';
+                  } else {
+                    document.getElementById('cache_loading_progress').style.display = 'none';
+                  }
+                }
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Service Worker registration failed:', error);
+          });
+      }
+    </script>
     <script src="node_modules/aframe/dist/aframe-v1.4.2.js"></script>
 
-    <script src="js/index.js"></script>
     <script type="module" src="handy-component.js"></script>
     <script type="module" src="html-component.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.1.0/dist/aframe-extras.min.js"></script>
@@ -70,17 +97,35 @@
 
 </head>
 <body>
+  <div>Loading...</div>
     <a-scene handy-component shadow="type: pcfsoft"
-    webxr="optionalFeatures:hand-tracking,dom-overlay;overlayElement:#dom-overlay;"
-    render-order="background, menu, menubutton, menutext, foreground, hud"
-    >
+      webxr="optionalFeatures:hand-tracking,dom-overlay;overlayElement:#dom-overlay;"
+      render-order="background, menu, menubutton, menutext, foreground, hud">
     <a-assets>
       <a-sphere id="branch_" ind material="color: green; emissive: green; emissiveIntensity: 5" radius="0.025" class="branch clickable"><a-sphere id="branch_perp_" ind color="red" radius="0.0125" class="branch_perp clickable" position="0.25 -0.5 0"></a-sphere></a-sphere>
       <a-asset-item id="help_model" src="./help.glb"></a-asset-item>
       <audio id="simple-piano-melody" src="simple-piano-melody-9834.mp3" preload="auto"></audio>
     </a-assets>
 
-    <a-entity id="melody" sound="src: #simple-piano-melody; loop: true; autoplay: false;" position="0 2 0"></a-entity>
+    <script>
+      const assets = document.querySelector('a-assets');
+  
+      assets.addEventListener('progress', handleProgress);
+      assets.addEventListener('loaded', handleLoaded);
+      function handleProgress(event) {
+        console.log('Scene Loading Progress:', event.detail.loadedBytes, '/', event.detail.totalBytes);
+        let percents = 100 * parseInt(event.detail.loadedBytes / event.detail.totalBytes);
+        let elProgress = document.getElementById('scene_loading_progress');
+        elProgress.textContent = `Scene Loading Progress: ${percents}%`;
+      }
+      function handleLoaded(event) {
+        console.log('Loading handleLoaded:', event);
+        let elProgress = document.getElementById('scene_loading_progress');
+        elProgress.style.display = 'none';
+      }
+    </script>
+
+    <a-entity id="melody" sound="src: #simple-piano-melody; loop: true; autoplay: false;" position="0 2 0" visible="false"></a-entity>
 
     <a-sphere color="red" radius="0.01" id="cursor" material="shader:flat"></a-sphere>
 
@@ -126,9 +171,12 @@
         <h1 style="width: fit-content">
           Fractals 3D
         </h1>
-        <h3>v0.2.4</h3>
+        <h3>v0.2.6</h3>
       </div>
-
+      <div style="display: flex; background-color: gray;">
+        <div id="cache_loading_progress">Cache Loading Progress: 0%</div>
+        <div id="scene_loading_progress">Scene Loading Progress: 0%</div>
+      </div>
       <div style="color: black">
         <p>Hints:</p>
         <ul>
