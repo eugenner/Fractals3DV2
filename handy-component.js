@@ -299,6 +299,37 @@ AFRAME.registerComponent("handy-component", {
       const defaultBgColor = document.getElementById("generateTree").style.backgroundColor;
       const defaultBgClickedColor = 'lightgray';
 
+      const recalcMaxIterations = () => {
+        let maxIterations = 2;
+        switch(fractalTree.length) {
+          case 1:
+          case 2:
+          case 3:
+          case 4:
+            maxIterations = 8;
+            break;
+          case 5:
+            maxIterations = 7;
+            break;
+          case 6:
+            maxIterations = 6;
+            break;
+          case 7:
+            maxIterations = 5;
+            break;
+          case 8:
+            maxIterations = 4;
+            break;
+          case 9:
+            maxIterations = 3;
+            break;
+        }
+        document.getElementById('rangeIterations').setAttribute('max', maxIterations);
+        if(this.iterationsNo > maxIterations) {
+          this.iterationsNo = maxIterations;
+          document.getElementById('iterationsVal').textContent = maxIterations;
+        }
+      }
 
       document.getElementById("addBranch").onclick = (evt) => {
         if(this.anyButtonBlocked)
@@ -307,7 +338,11 @@ AFRAME.registerComponent("handy-component", {
         playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
+        
+        
         addBranch();
+        recalcMaxIterations();
+
         // refresh movables array
         this.movables = Array.from(document.getElementsByClassName('movable'))
           .map((e, i) => {
@@ -329,6 +364,7 @@ AFRAME.registerComponent("handy-component", {
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
         removeBranch();
+        recalcMaxIterations();
         // refresh movables array
         this.movables = Array.from(document.getElementsByClassName('movable'))
           .map((e, i) => {
