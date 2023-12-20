@@ -206,7 +206,10 @@ AFRAME.registerComponent("handy-component", {
     this.el.sceneEl.addEventListener('loaded', (sceneEvt) => {
       console.log('scene-loaded');
 
-
+      let lv_list_to_remove = document.getElementsByClassName('loading_value');
+      Array.from(lv_list_to_remove).forEach(function (element) {
+        element.remove();
+      });
 
       const rig = document.getElementById('rig').object3D;
       this.tScene = this.el.sceneEl.object3D;

@@ -12,7 +12,6 @@ self.addEventListener("install", e => {
                     './images/logo192.png',
                     './images/logo512.png',
                     './half_tr__texture.png',
-                    './js/index.js',
                     './click.mp3',
                     './simple-piano-melody-9834.mp3',
                     './sunrise_105.mp3',                
@@ -45,9 +44,25 @@ self.addEventListener("install", e => {
     
                 
             ];
+            const progressStep = 100 / resourcesToCache.length;
+            let currentProgress = 0;
             const fetchPromises = resourcesToCache.map(url => {
                 return fetch(url)
-                  .then(response => cache.put(url, response.clone()))
+                  .then(response => cache.put(url, response.clone())
+                    .then(() => {
+                        currentProgress += progressStep;
+                        // https://developer.mozilla.org/en-US/docs/Web/API/Clients/matchAll
+                        self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+                            .then(clients => {
+                                clients.forEach(client => {
+                                    // Send a message to each client
+                                    console.log('trying to post a message, currentProgress: ' + currentProgress);
+                                    client.postMessage({
+                                        progress: currentProgress
+                                    });
+                                });
+                            });
+                    }))
                   .catch(error => console.error(`Failed to cache ${url}: ${error}`));
               });
           
