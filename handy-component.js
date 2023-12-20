@@ -63,6 +63,8 @@ AFRAME.registerComponent("handy-component", {
 
     this.triangleMeshTexture = this.getTexture();
 
+    this.anyButtonBlocked = false;
+
     this.onPinchStart = this.onPinchStart.bind(this);
     this.onPinchEnd = this.onPinchEnd.bind(this);
     this.onConnected = this.onConnected.bind(this);
@@ -299,6 +301,9 @@ AFRAME.registerComponent("handy-component", {
 
 
       document.getElementById("addBranch").onclick = (evt) => {
+        if(this.anyButtonBlocked)
+          return;
+        this.anyButtonBlocked = true;
         playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
@@ -309,12 +314,17 @@ AFRAME.registerComponent("handy-component", {
             return e.object3D;
           });
         // show button pressed style
+        let that = this;
         setTimeout(function () {
           el.style.backgroundColor = defaultBgColor;
-        }, 300);
+          that.anyButtonBlocked = false;
+        }, 500);
       };
 
       document.getElementById("removeBranch").onclick = (evt) => {
+        if(this.anyButtonBlocked)
+          return;
+        this.anyButtonBlocked = true;
         playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
@@ -324,12 +334,17 @@ AFRAME.registerComponent("handy-component", {
           .map((e, i) => {
             return e.object3D;
           });
+        let that = this;
         setTimeout(function () {
           el.style.backgroundColor = defaultBgColor;
-        }, 300);
+          that.anyButtonBlocked = false;
+        }, 500);
       };
 
       document.getElementById("removeAllBranches").onclick = (evt) => {
+        if(this.anyButtonBlocked)
+          return;
+        this.anyButtonBlocked = true;        
         playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
@@ -339,9 +354,11 @@ AFRAME.registerComponent("handy-component", {
           .map((e, i) => {
             return e.object3D;
           });
+        let that = this;
         setTimeout(function () {
           el.style.backgroundColor = defaultBgColor;
-        }, 300);
+          that.anyButtonBlocked = false;
+        }, 500);
       };
 
       // Worker for the fractals tree calculation
@@ -353,7 +370,7 @@ AFRAME.registerComponent("handy-component", {
 
         document.getElementById('statusText').innerHTML = 'Ready';
         document.getElementById("generateTree").style.backgroundColor = defaultBgColor;
-
+        component.anyButtonBlocked = false;
         // place the scaled tree close to ui panel
         if(component.isImmersive) {
           const scaledTree = document.getElementById("scaled_tree").object3D;
@@ -420,6 +437,9 @@ AFRAME.registerComponent("handy-component", {
       }
       // Run task in worker
       document.getElementById("generateTree").onclick = (evt) => {
+        if(this.anyButtonBlocked)
+          return;
+        this.anyButtonBlocked = true;        
         playClickSound();
         evt.currentTarget.style.backgroundColor = defaultBgClickedColor;
         document.getElementById('statusText').innerHTML = 'Calculation';
@@ -433,6 +453,9 @@ AFRAME.registerComponent("handy-component", {
       }
 
       document.getElementById("addRandomTree").onclick = (evt) => {
+        if(this.anyButtonBlocked)
+          return;
+        this.anyButtonBlocked = true;
         playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
@@ -443,9 +466,11 @@ AFRAME.registerComponent("handy-component", {
           .map((e, i) => {
             return e.object3D;
           });
+        let that = this;  
         setTimeout(function () {
           el.style.backgroundColor = defaultBgColor;
-        }, 300);
+          that.anyButtonBlocked = false;
+        }, 500);
       };
 
       const clearTree = () => {
@@ -462,15 +487,19 @@ AFRAME.registerComponent("handy-component", {
       
 
       document.getElementById("clearTree").onclick = (evt) => {
+        if(this.anyButtonBlocked)
+          return;
+        this.anyButtonBlocked = true;        
         playClickSound();
         const el = evt.currentTarget;
         el.style.backgroundColor = defaultBgClickedColor;
 
         clearTree();
-
+        let that = this;
         setTimeout(function () {
           el.style.backgroundColor = defaultBgColor;
-        }, 300);
+          that.anyButtonBlocked = false;
+        }, 500);
       };
 
       const switchLightButtons = document.querySelectorAll('input[type="radio"][name="switchLight"]');
@@ -543,8 +572,15 @@ AFRAME.registerComponent("handy-component", {
 
 
       document.getElementById("help").onclick = (evt) => {
+        if(this.anyButtonBlocked)
+          return;
+        this.anyButtonBlocked = true;
         playClickSound();
         showHelp(evt);
+        let that = this;        
+        setTimeout(function () {
+          that.anyButtonBlocked = false;
+        }, 500);
       }
 
       const switchMusic = (mode) => {
